@@ -1,4 +1,4 @@
-        // --- VARIABLES TAILWIND ---
+    // --- VARIABLES TAILWIND ---
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -21,7 +21,8 @@
         } else {
             document.documentElement.classList.remove('dark')
         }
-        let currentData = { salary: 0, bonus: 0, items: [] };
+
+       let currentData = { salary: 0, bonus: 0, items: [] };
         let currentYearMonth = ""; 
         let itemToDeleteId = null; 
         let itemToEditId = null; 
@@ -236,7 +237,6 @@
             document.getElementById('editAmount').value = item.amount;
             document.getElementById('editIcon').value = item.icon;
             
-            // Set radio button for source
             const radios = document.getElementsByName('editSource');
             for(const r of radios) {
                 if(r.value === item.source) r.checked = true;
@@ -336,6 +336,7 @@
             const balB = currentData.bonus - spentB;
             const totalSav = balS + balB;
             const totalHist = calculateAccumulated();
+            const totalSpent = spentS + spentB;
 
             const rows = currentData.items.map(i => `
                 <tr style="border-bottom:1px solid #eee"><td style="padding:10px;color:#666;font-size:12px">${i.date}</td>
@@ -345,9 +346,12 @@
 
             const content = `
                 <div style="font-family:Arial,sans-serif;padding:40px;background:white;color:#333">
-                    <div style="display:flex;justify-content:space-between;border-bottom:3px solid #4F46E5;padding-bottom:20px;margin-bottom:30px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #4F46E5;padding-bottom:20px;margin-bottom:30px">
                         <div><h1 style="margin:0;font-size:24px">Reporte Mensual</h1><p style="margin:5px 0 0;color:#666">Periodo: <strong>${currentYearMonth}</strong></p></div>
-                        <div style="text-align:right"><div style="background:#10B981;color:white;padding:10px;border-radius:8px"><div style="font-size:10px;text-transform:uppercase">Ahorro Histórico</div><div style="font-size:18px;font-weight:bold">${money.format(totalHist)}</div></div></div>
+                        <div style="display:flex;gap:15px;text-align:right">
+                            <div style="background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px"><div style="font-size:10px;text-transform:uppercase">Total Gastado</div><div style="font-size:18px;font-weight:bold">-${money.format(totalSpent)}</div></div>
+                            <div style="background:#10B981;color:white;padding:10px;border-radius:8px"><div style="font-size:10px;text-transform:uppercase">Ahorro Histórico</div><div style="font-size:18px;font-weight:bold">${money.format(totalHist)}</div></div>
+                        </div>
                     </div>
                     <table style="width:100%;border-spacing:10px 0;margin-bottom:30px"><tr>
                         <td style="background:#f9fafb;padding:15px;border-radius:8px;border:1px solid #e5e7eb;width:50%"><div style="font-size:11px;font-weight:bold;color:#4F46E5">CUENTA PRINCIPAL</div><div style="font-size:20px;font-weight:bold;margin:5px 0">${money.format(balS)}</div></td>
