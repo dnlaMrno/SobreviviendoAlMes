@@ -1,90 +1,125 @@
 # 💸 Sobreviviendo al Mes
 
+**Dashboard financiero personal** para controlar ingresos, gastos y ahorros mensuales de forma **simple, visual y sin complicaciones**.  
+Olvídate de los excels eternos: esto es **rápido, responsivo, moderno y directo en tu navegador**.
 
-# Deploy: https://sobreviviendo-al-mes.vercel.app/
+---
 
-<img src="/assets/dashboardSobreviviendoAlMes.png" alt="Dashboard img">
+## 🚀 Deploy
 
-Un dashboard financiero personal, moderno y directo para llevar el control de tus ingresos y gastos mensuales sin complicaciones. Olvídate de excels aburridos; esto es visual, rápido, responsivo y funciona directamente en tu navegador.
+👉 https://sobreviviendo-al-mes.vercel.app/
 
-✨ Características Principales
+![Dashboard](./assets/dashboardSobreviviendoAlMes.png)
 
-Control Doble de Ingresos: Gestiona dos fuentes de dinero por separado (ej. Sueldo Principal y Bonos/Extras) con visualización clara de saldos.
+---
 
-Modo Oscuro (Dark Mode): 🌙 Detecta automáticamente la preferencia de tu sistema e incluye un interruptor manual para cuidar tu vista.
+## ✨ Características principales
 
-Gestión de Ahorros:
+- ✔️ **Control doble de ingresos**  
+  Administra dos fuentes de dinero por separado  
+  (por ejemplo: *Sueldo* + *Bonos/Extras*).
 
-Mensual: Cálculo automático de lo que te sobra mes a mes.
+- 🌙 **Modo oscuro automático y manual**  
+  Detecta la preferencia del sistema e incluye interruptor.
 
-Histórico: Visualiza tu "Imperio" acumulado sumando los ahorros de todos los meses registrados.
+- 💰 **Gestión de ahorros**
+  - cálculo automático del ahorro mensual  
+  - histórico acumulado (“tu imperio”)
 
-Control de Gastos Inteligente:
+- 🧠 **Control inteligente de gastos**
+  - alerta de **gastos hormiga** 🐜 al superar $100.000  
+  - popup + alerta visual
 
-Alerta de "Gastos Hormiga": 🐜 Te avisa con un popup y una alerta visual si tus gastos en salidas, comida o vicios superan los $100,000.
+- 🔍 **Filtros por categoría**
+  - supermercado, casa, servicios, etc.
 
-Filtros por Categoría: Encuentra rápidamente cuánto gastaste en Supermercado, Casa, etc.
+- ✏️ **Edición completa de movimientos**
+  Puedes editar:
+  - monto  
+  - concepto  
+  - ícono  
+  - origen del dinero  
 
-Edición Completa: ✏️ ¿Te equivocaste? Edita monto, concepto, ícono y origen del dinero sin tener que borrar y crear de nuevo.
+- 📱 **Diseño responsivo**
+  - pensado para móviles  
+  - tarjetas con acordeones
 
-Interfaz Responsiva & Acordeones: Diseño optimizado para móviles que organiza la información en tarjetas desplegables para evitar el scroll infinito.
+- 🔢 **Formato automático de montos**
+  Comas y decimales para evitar errores de lectura.
 
-Formatos Automáticos: Los campos de dinero se formatean solos con comas y decimales para evitar errores de lectura.
+- 📄 **Exportación a PDF**
+  Incluye:
+  - resumen de saldos  
+  - total gastado  
+  - detalle de movimientos  
 
-Exportación a PDF: Genera reportes profesionales con resumen de saldos, total gastado y detalle de movimientos.
+- 🔒 **Privacidad total**
+  Todo se guarda en **LocalStorage**.  
+  Nada sale de tu dispositivo.
 
-Privacidad Total: Todos los datos se guardan en el LocalStorage de tu navegador. Nada sale de tu dispositivo.
+---
 
-🚀 Cómo Usar
+## 🧭 Cómo usar
 
-Abrir: Abre el archivo index.html en tu navegador favorito.
+1. **Abrir**
+   - abre `index.html` en tu navegador
 
-Configurar Ingresos: Despliega las tarjetas de "Sueldo" y "Bono" para ingresar tus montos mensuales.
+2. **Configurar ingresos**
+   - completa “Sueldo” y “Bono”
 
-Registrar Gastos:
+3. **Registrar gastos**
+   - elige el origen (Sueldo / Bono)
+   - agrega concepto, monto e ícono
 
-Elige el origen (Sueldo o Bono).
+4. **Analizar**
+   - usa el filtro de categorías
+   - mira la tarjeta de ahorro
 
-Ingresa concepto, monto e ícono.
+5. **Gestionar**
+   - ✏️ editar registros  
+   - 🗑️ eliminar registros  
+   - ⬅️➡️ cambiar de mes  
 
-¡Listo! Los saldos se actualizan en tiempo real.
+Todo se actualiza en **tiempo real**.
 
-Analizar:
+---
 
-Usa el filtro de arriba de la tabla para ver gastos específicos.
+## 🎨 Personalización
 
-Observa la tarjeta de "Ahorro" para ver tu progreso global.
+Puedes modificar la paleta de colores editando las variables CSS en `index.html`:
 
-Gestionar:
-
-Usa el ✏️ para corregir errores.
-
-Usa el 🗑️ para eliminar registros.
-
-Cambia de mes con las flechas < > en la barra superior.
-
-🎨 Personalización
-
-Puedes adaptar los colores a tu gusto editando las variables CSS al inicio del archivo index.html:
-
+```css
 :root {
-    --color-primary: #4F46E5;   /* Color Principal */
-    --color-secondary: #0EA5E9; /* Color Secundario */
-    --color-tertiary: #10B981;  /* Color de Ahorro */
-    --color-bg: #f3f4f6;        /* Fondo (Modo Claro) */
+  --color-primary: #4F46E5;   /* Color principal */
+  --color-secondary: #0EA5E9; /* Color secundario */
+  --color-tertiary: #10B981;  /* Color de ahorro */
+  --color-bg: #f3f4f6;        /* Fondo modo claro */
 }
+```
 
+---
 
-🛠️ Tecnologías
+## 🛠️ Tecnologías utilizadas
 
-HTML5 & CSS3
+- HTML5 + CSS3  
+- Tailwind CSS (CDN)  
+- JavaScript Vanilla  
+- LocalStorage  
+- FontAwesome (iconos)  
+- html2pdf.js  
+- Google Fonts — *Inter*
 
-Tailwind CSS (vía CDN) para estilos, responsividad y modo oscuro.
+---
 
-JavaScript (Vanilla) para toda la lógica de negocio y persistencia.
+## 💡 Próximas mejoras (roadmap)
 
-FontAwesome para los iconos.
+- gráficos de gastos por categoría  
+- más fuentes de ingresos configurables  
+- backup en la nube opcional  
+- multimoneda  
 
-html2pdf.js para la generación de reportes.
+---
 
-Google Fonts (Tipografía 'Inter').
+### ✨ Autor
+
+Proyecto desarrollado con 💚 para organizar mejor las finanzas personales.
