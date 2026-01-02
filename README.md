@@ -1,70 +1,87 @@
 # 💸 Sobreviviendo al Mes
 
+
 # Deploy: https://sobreviviendo-al-mes.vercel.app/
 
 <img src="/assets/dashboardSobreviviendoAlMes.png" alt="Dashboard img">
 
-Un dashboard financiero personal, simple y directo para llevar el control de tus ingresos y gastos mensuales sin complicaciones. Olvídate de excels aburridos; esto es visual, rápido y funciona en tu navegador.
-
-(Reemplaza esto con una captura de tu dashboard)
+Un dashboard financiero personal, moderno y directo para llevar el control de tus ingresos y gastos mensuales sin complicaciones. Olvídate de excels aburridos; esto es visual, rápido, responsivo y funciona directamente en tu navegador.
 
 ✨ Características Principales
 
-Control Doble: Gestiona dos fuentes de dinero por separado (ej. Sueldo Principal y Bonos/Extras).
+Control Doble de Ingresos: Gestiona dos fuentes de dinero por separado (ej. Sueldo Principal y Bonos/Extras) con visualización clara de saldos.
 
-Cálculos en Tiempo Real: Ingresa tus montos y mira cómo se actualiza tu "Disponible" automáticamente.
+Modo Oscuro (Dark Mode): 🌙 Detecta automáticamente la preferencia de tu sistema e incluye un interruptor manual para cuidar tu vista.
 
-Formateo Inteligente: Los campos de dinero entienden automáticamente miles y decimales para evitar confusiones (ej. 15000 se convierte en 15,000.00).
+Gestión de Ahorros:
 
-Exportación a PDF: Genera un reporte profesional en PDF con un solo clic, listo para guardar o imprimir.
+Mensual: Cálculo automático de lo que te sobra mes a mes.
 
-Persistencia: Todo se guarda automáticamente en tu navegador (Local Storage). Si cierras la pestaña y vuelves, tus datos siguen ahí.
+Histórico: Visualiza tu "Imperio" acumulado sumando los ahorros de todos los meses registrados.
 
-Privacidad Total: Los datos viven en tu dispositivo, no se envían a ninguna nube externa.
+Control de Gastos Inteligente:
+
+Alerta de "Gastos Hormiga": 🐜 Te avisa con un popup y una alerta visual si tus gastos en salidas, comida o vicios superan los $100,000.
+
+Filtros por Categoría: Encuentra rápidamente cuánto gastaste en Supermercado, Casa, etc.
+
+Edición Completa: ✏️ ¿Te equivocaste? Edita monto, concepto, ícono y origen del dinero sin tener que borrar y crear de nuevo.
+
+Interfaz Responsiva & Acordeones: Diseño optimizado para móviles que organiza la información en tarjetas desplegables para evitar el scroll infinito.
+
+Formatos Automáticos: Los campos de dinero se formatean solos con comas y decimales para evitar errores de lectura.
+
+Exportación a PDF: Genera reportes profesionales con resumen de saldos, total gastado y detalle de movimientos.
+
+Privacidad Total: Todos los datos se guardan en el LocalStorage de tu navegador. Nada sale de tu dispositivo.
 
 🚀 Cómo Usar
 
-Abrir: Simplemente abre el archivo index.html en cualquier navegador web moderno (Chrome, Edge, Firefox, Safari).
+Abrir: Abre el archivo index.html en tu navegador favorito.
 
-Ingresar Ingresos: Escribe tu sueldo neto y bonos en las tarjetas superiores.
+Configurar Ingresos: Despliega las tarjetas de "Sueldo" y "Bono" para ingresar tus montos mensuales.
 
 Registrar Gastos:
 
-Selecciona de dónde sale el dinero (Sueldo o Bono).
+Elige el origen (Sueldo o Bono).
 
-Escribe qué compraste y cuánto costó.
+Ingresa concepto, monto e ícono.
 
-Elige un icono divertido.
+¡Listo! Los saldos se actualizan en tiempo real.
 
-¡Dale a "Registrar"!
+Analizar:
 
-Gestionar Meses: Usa las flechas < > en la parte superior para cambiar de mes. Cada mes tiene su propio historial independiente.
+Usa el filtro de arriba de la tabla para ver gastos específicos.
 
-🎨 Personalización (¡Hazlo tuyo!)
+Observa la tarjeta de "Ahorro" para ver tu progreso global.
 
-Puedes cambiar los colores para que coincidan con tu estilo (o tu imagen favorita) editando las variables CSS al principio del archivo index.html.
+Gestionar:
 
-Busca esta sección en el código:
+Usa el ✏️ para corregir errores.
+
+Usa el 🗑️ para eliminar registros.
+
+Cambia de mes con las flechas < > en la barra superior.
+
+🎨 Personalización
+
+Puedes adaptar los colores a tu gusto editando las variables CSS al inicio del archivo index.html:
 
 :root {
-    /* Edita estos códigos HEX */
-    --color-primary: #4F46E5;   /* Color para Sueldo / Botones Principales */
-    --color-secondary: #0EA5E9; /* Color para Bono / Acentos */
-    
-    --color-bg: #f3f4f6;        /* Color de Fondo de la página */
-    --text-dark: #1f2937;
+    --color-primary: #4F46E5;   /* Color Principal */
+    --color-secondary: #0EA5E9; /* Color Secundario */
+    --color-tertiary: #10B981;  /* Color de Ahorro */
+    --color-bg: #f3f4f6;        /* Fondo (Modo Claro) */
 }
 
 
-Simplemente reemplaza los códigos (ej. #4F46E5) por los colores que tú quieras. Todo el diseño (botones, gradientes, textos) se actualizará automáticamente.
-
-🛠️ Tecnologías Usadas
+🛠️ Tecnologías
 
 HTML5 & CSS3
 
-Tailwind CSS (vía CDN) para estilos rápidos y modernos.
+Tailwind CSS (vía CDN) para estilos, responsividad y modo oscuro.
 
-JavaScript (Vanilla) para toda la lógica.
+JavaScript (Vanilla) para toda la lógica de negocio y persistencia.
 
 FontAwesome para los iconos.
 
