@@ -1,5 +1,5 @@
         // --- VARIABLES TAILWIND ---
-        tailwind.config = {
+            tailwind.config = {
             theme: {
                 extend: {
                     colors: {
@@ -8,7 +8,7 @@
                         bg: 'var(--color-bg)',
                     },
                     screens: {
-                        'xs': '360px', // Breakpoint extra pequeño
+                        'xs': '360px',
                     }
                 }
             }
@@ -73,7 +73,6 @@
             const stored = localStorage.getItem(storageKey);
             currentData = stored ? JSON.parse(stored) : { salary: 0, bonus: 0, items: [] };
 
-            // Cargar y formatear visualmente
             elSalaryInput.value = currentData.salary > 0 ? currentData.salary : '';
             formatElement(elSalaryInput);
             
@@ -91,11 +90,19 @@
             localStorage.setItem(storageKey, JSON.stringify(currentData));
         }
 
+        // --- CORRECCIÓN CALENDARIO (ZONAS HORARIAS) ---
         function changeMonth(delta) {
-            const date = new Date(currentYearMonth + "-01");
-            date.setMonth(date.getMonth() + delta);
+            const parts = currentYearMonth.split('-');
+            const currentY = parseInt(parts[0]);
+            const currentM = parseInt(parts[1]);
+            
+            // Creamos fecha local para evitar saltos por zona horaria
+            // (año, mes 0-based, dia 1)
+            const date = new Date(currentY, currentM - 1 + delta, 1);
+            
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
+            
             elMonthPicker.value = `${year}-${month}`;
             loadMonthData();
         }
@@ -143,7 +150,6 @@
 
             currentData.items.unshift(newItem);
             
-            // Limpiar y resetear
             nameInput.value = '';
             amountInput.value = ''; 
             iconSelect.value = "";
@@ -155,17 +161,19 @@
             updateDashboard();
         }
 
-        // --- POPUP MODAL ---
+        // --- FUNCIONES MODALES ---
         function openDeleteModal(id) {
             itemToDeleteId = id;
-            const modal = document.getElementById('deleteModal');
-            modal.classList.remove('hidden');
+            document.getElementById('deleteModal').classList.remove('hidden');
         }
 
         function closeDeleteModal() {
             itemToDeleteId = null;
-            const modal = document.getElementById('deleteModal');
-            modal.classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
         }
 
         function confirmDelete() {
@@ -211,7 +219,7 @@
                         -${money.format(item.amount)}
                     </td>
                     <td class="p-3 sm:p-4 text-center">
-                        <button onclick="openDeleteModal(${item.id})" class="text-gray-300 hover:text-red-500 transition px-2 opacity-0 group-hover:opacity-100 focus:opacity-100">
+                        <button onclick="openDeleteModal(${item.id})" class="text-gray-400 hover:text-red-500 transition px-2">
                             <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
@@ -311,5 +319,16 @@
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().from(element).set(opt).save();
+            html2pdf().from(element).set(opt).save().then(() => {
+                // MOSTRAR MODAL DE ÉXITO
+                const modal = document.getElementById('successModal');
+                modal.classList.remove('hidden');
+                
+                // Cierre automático opcional (3 segundos)
+                setTimeout(() => {
+                    if(!modal.classList.contains('hidden')) {
+                        closeSuccessModal();
+                    }
+                }, 3000);
+            });
         }
