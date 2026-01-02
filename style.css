@@ -1,5 +1,5 @@
-/* --- PALETA DE COLORES --- */
-        :root {
+ /* --- PALETA DE COLORES --- */
+:root {
             --color-primary: #4F46E5;   
             --color-secondary: #0EA5E9; 
             --color-tertiary: #10B981;  
@@ -7,7 +7,13 @@
             --text-dark: #1f2937;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); color: var(--text-dark); }
+        .dark {
+            --color-bg: #020617;
+            --text-dark: #f1f5f9;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); color: var(--text-dark); transition: background-color 0.3s, color 0.3s; }
+        
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
@@ -16,18 +22,27 @@
 
         /* Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
         
         /* Header Cristal */
-        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .glass-header { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px); 
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .dark .glass-header {
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom-color: #334155;
+        }
         
         /* Gradientes */
         .salary-gradient { background: linear-gradient(135deg, var(--color-primary) 0%, #312e81 100%); }
         .mp-gradient { background: linear-gradient(135deg, var(--color-secondary) 0%, #005f8f 100%); }
         .savings-gradient { background: linear-gradient(135deg, var(--color-tertiary) 0%, #064e3b 100%); }
 
-        /* Radio Buttons */
+        /* Radio Buttons Main Form */
         input:checked + div.radio-box-primary {
             border-color: var(--color-primary); background-color: rgba(79, 70, 229, 0.1); color: var(--color-primary);
         }
@@ -49,9 +64,11 @@
         .accordion-icon { transition: transform 0.3s; }
         .accordion-open .accordion-icon { transform: rotate(180deg); }
 
-        /* Estilo para dinero gastado (Nuevo) */
-        .spent-out {
-            text-decoration: line-through;
-            opacity: 0.3;
-            color: #9ca3af; /* Gray-400 */
+        .spent-out { text-decoration: line-through; opacity: 0.3; }
+        .dark .spent-out { color: #64748b; }
+        
+        .animate-pulse-red { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
         }

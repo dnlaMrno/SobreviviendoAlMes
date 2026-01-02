@@ -12,23 +12,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <title>Mi Dashboard Sobreviviendo al Mes</title>
 </head>
-<body class="min-h-screen flex flex-col relative">
+<body class="min-h-screen flex flex-col relative transition-colors duration-300">
 
     <!-- Navbar -->
     <nav class="glass-header sticky top-0 z-40 border-b border-gray-200 shadow-sm py-3">
         <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
                 <div class="bg-primary text-white p-2 rounded-lg shadow-md shadow-primary/30"><i class="fas fa-chart-line"></i></div>
-                <h1 class="text-xl font-bold tracking-tight text-gray-800">Sobrevi<span class="text-primary">viendo al Mes</span></h1>
+                <h1 class="text-xl font-bold tracking-tight text-gray-800 dark:text-white">Sobrevi<span class="text-primary">viendo al Mes</span></h1>
             </div>
             
             <div class="flex gap-3 items-center w-full sm:w-auto justify-center">
-                <div class="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
-                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-white rounded-md text-gray-600 transition"><i class="fas fa-chevron-left"></i></button>
-                    <input type="month" id="monthPicker" class="bg-transparent border-none font-bold text-gray-700 focus:ring-0 cursor-pointer mx-2 outline-none" onchange="loadMonthData()">
-                    <button onclick="changeMonth(1)" class="p-2 hover:bg-white rounded-md text-gray-600 transition"><i class="fas fa-chevron-right"></i></button>
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-slate-800 transition">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline text-yellow-400"></i>
+                </button>
+
+                <div class="flex items-center bg-gray-100 dark:bg-slate-800 rounded-lg p-1 border border-gray-200 dark:border-slate-700">
+                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-md text-gray-600 dark:text-gray-300 transition"><i class="fas fa-chevron-left"></i></button>
+                    <input type="month" id="monthPicker" class="bg-transparent border-none font-bold text-gray-700 dark:text-gray-200 focus:ring-0 cursor-pointer mx-2 outline-none dark:[color-scheme:dark]" onchange="loadMonthData()">
+                    <button onclick="changeMonth(1)" class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-md text-gray-600 dark:text-gray-300 transition"><i class="fas fa-chevron-right"></i></button>
                 </div>
-                <button onclick="generatePDF()" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition shadow-md flex items-center gap-2">
+
+                <button onclick="generatePDF()" class="bg-gray-800 hover:bg-gray-700 dark:bg-slate-700 dark:hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-sm font-semibold transition shadow-md flex items-center gap-2">
                     <i class="fas fa-file-pdf"></i> <span class="hidden sm:inline">PDF</span>
                 </button>
             </div>
@@ -37,200 +43,176 @@
 
     <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-6 z-10 flex flex-col gap-6">
         
+        <!-- ALERTA HORMIGA -->
+        <div id="antExpenseAlert" class="hidden bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 p-4 rounded-r shadow-md animate-pulse-red mb-2 fade-in">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 text-red-500">
+                    <i class="fas fa-exclamation-triangle text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-red-700 dark:text-red-300">¡Cuidado con los Gastos Hormiga!</p>
+                    <p class="text-xs text-red-600 dark:text-red-200 mt-1">Has superado el límite de $100,000 en gastos extras. Total actual: <span id="antTotalDisplay" class="font-black">$0.00</span></p>
+                </div>
+                <div class="ml-auto pl-3">
+                    <button onclick="document.getElementById('antExpenseAlert').classList.add('hidden')" class="text-red-400 hover:text-red-600 dark:hover:text-red-200"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN CUENTAS -->
         <div class="flex flex-col gap-4">
-            
             <!-- 1. ACORDEÓN SUELDO -->
-            <div id="acc-salary" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden accordion-open">
-                <button onclick="toggleAccordion('acc-salary')" class="w-full p-4 flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition text-left">
+            <div id="acc-salary" class="bg-white dark:bg-darkcard rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden accordion-open transition-colors">
+                <button onclick="toggleAccordion('acc-salary')" class="w-full p-4 flex justify-between items-center bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition text-left">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-indigo-100 text-primary flex items-center justify-center"><i class="fas fa-briefcase"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 text-primary dark:text-indigo-300 flex items-center justify-center"><i class="fas fa-briefcase"></i></div>
                         <div>
-                            <h3 class="font-bold text-gray-800 text-sm">Sueldo / Principal</h3>
-                            <p class="text-[10px] text-gray-500 font-medium sm:hidden">Disp: <span id="headerBalSalary">$0.00</span></p>
+                            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">Sueldo / Principal</h3>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium sm:hidden">Disp: <span id="headerBalSalary">$0.00</span></p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="hidden sm:block font-bold text-primary" id="headerBalSalaryDesktop">$0.00</span>
-                        <i class="fas fa-chevron-down text-gray-400 accordion-icon"></i>
+                        <span class="hidden sm:block font-bold text-primary dark:text-indigo-400" id="headerBalSalaryDesktop">$0.00</span>
+                        <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500 accordion-icon"></i>
                     </div>
                 </button>
-                
                 <div class="accordion-content">
-                    <div class="p-6 border-t border-gray-100">
-                        <label class="text-xs font-semibold text-gray-400 uppercase">Ingreso Mensual</label>
+                    <div class="p-6 border-t border-gray-100 dark:border-slate-700">
+                        <label class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase">Ingreso Mensual</label>
                         <div class="flex items-center gap-2 mb-4">
                             <span class="text-xl text-gray-400">$</span>
-                            <input type="text" inputmode="decimal" id="salaryInput" 
-                                class="w-full text-2xl sm:text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-primary outline-none bg-transparent placeholder-gray-300 transition-all duration-300" 
-                                placeholder="0.00" onfocus="unformatElement(this)" oninput="updateDashboard()" onblur="formatElement(this); updateDashboard()" onkeypress="return isNumberKey(event)">
+                            <input type="text" inputmode="decimal" id="salaryInput" class="w-full text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white border-b border-gray-200 dark:border-slate-600 focus:border-primary outline-none bg-transparent placeholder-gray-300 dark:placeholder-slate-600 transition-all duration-300" placeholder="0.00" onfocus="unformatElement(this)" oninput="updateDashboard()" onblur="formatElement(this); updateDashboard()" onkeypress="return isNumberKey(event)">
                         </div>
                         <div class="rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-0 salary-gradient text-white shadow-lg shadow-primary/20">
-                            <div>
-                                <p class="text-xs opacity-80 mb-1">Disponible Sueldo</p>
-                                <h2 class="text-2xl font-bold break-all" id="balanceSalary">$0.00</h2>
-                            </div>
-                            <div class="text-left sm:text-right">
-                                <p class="text-xs opacity-60">Gastado</p>
-                                <p class="font-medium text-white/90 break-all" id="spentSalary">-$0.00</p>
-                            </div>
+                            <div><p class="text-xs opacity-80 mb-1">Disponible Sueldo</p><h2 class="text-2xl font-bold break-all" id="balanceSalary">$0.00</h2></div>
+                            <div class="text-left sm:text-right"><p class="text-xs opacity-60">Gastado</p><p class="font-medium text-white/90 break-all" id="spentSalary">-$0.00</p></div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 2. ACORDEÓN BONO -->
-            <div id="acc-bonus" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <button onclick="toggleAccordion('acc-bonus')" class="w-full p-4 flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition text-left">
+            <div id="acc-bonus" class="bg-white dark:bg-darkcard rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
+                <button onclick="toggleAccordion('acc-bonus')" class="w-full p-4 flex justify-between items-center bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition text-left">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-sky-100 text-secondary flex items-center justify-center"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900 text-secondary dark:text-sky-300 flex items-center justify-center"><i class="fas fa-hand-holding-usd"></i></div>
                         <div>
-                            <h3 class="font-bold text-gray-800 text-sm">Bono / Extra</h3>
-                            <p class="text-[10px] text-gray-500 font-medium sm:hidden">Disp: <span id="headerBalBonus">$0.00</span></p>
+                            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">Bono / Extra</h3>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium sm:hidden">Disp: <span id="headerBalBonus">$0.00</span></p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="hidden sm:block font-bold text-secondary" id="headerBalBonusDesktop">$0.00</span>
-                        <i class="fas fa-chevron-down text-gray-400 accordion-icon"></i>
+                        <span class="hidden sm:block font-bold text-secondary dark:text-sky-400" id="headerBalBonusDesktop">$0.00</span>
+                        <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500 accordion-icon"></i>
                     </div>
                 </button>
-                
                 <div class="accordion-content">
-                    <div class="p-6 border-t border-gray-100">
-                        <label class="text-xs font-semibold text-gray-400 uppercase">Monto del Bono</label>
+                    <div class="p-6 border-t border-gray-100 dark:border-slate-700">
+                        <label class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase">Monto del Bono</label>
                         <div class="flex items-center gap-2 mb-4">
                             <span class="text-xl text-gray-400">$</span>
-                            <input type="text" inputmode="decimal" id="bonusInput" 
-                                class="w-full text-2xl sm:text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-secondary outline-none bg-transparent placeholder-gray-300 transition-all duration-300" 
-                                placeholder="0.00" onfocus="unformatElement(this)" oninput="updateDashboard()" onblur="formatElement(this); updateDashboard()" onkeypress="return isNumberKey(event)">
+                            <input type="text" inputmode="decimal" id="bonusInput" class="w-full text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white border-b border-gray-200 dark:border-slate-600 focus:border-secondary outline-none bg-transparent placeholder-gray-300 dark:placeholder-slate-600 transition-all duration-300" placeholder="0.00" onfocus="unformatElement(this)" oninput="updateDashboard()" onblur="formatElement(this); updateDashboard()" onkeypress="return isNumberKey(event)">
                         </div>
                         <div class="rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-0 mp-gradient text-white shadow-lg shadow-secondary/20">
-                            <div>
-                                <p class="text-xs opacity-80 mb-1">Disponible Bono</p>
-                                <h2 class="text-2xl font-bold break-all" id="balanceBonus">$0.00</h2>
-                            </div>
-                            <div class="text-left sm:text-right">
-                                <p class="text-xs opacity-60">Gastado</p>
-                                <p class="font-medium text-white/90 break-all" id="spentBonus">-$0.00</p>
-                            </div>
+                            <div><p class="text-xs opacity-80 mb-1">Disponible Bono</p><h2 class="text-2xl font-bold break-all" id="balanceBonus">$0.00</h2></div>
+                            <div class="text-left sm:text-right"><p class="text-xs opacity-60">Gastado</p><p class="font-medium text-white/90 break-all" id="spentBonus">-$0.00</p></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 3. ACORDEÓN AHORRO (ACUMULADO) -->
-            <div id="acc-savings" class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden accordion-open">
-                <button onclick="toggleAccordion('acc-savings')" class="w-full p-4 flex justify-between items-center bg-gray-50 hover:bg-gray-100 transition text-left border-l-4 border-tertiary">
+            <!-- 3. ACORDEÓN AHORRO -->
+            <div id="acc-savings" class="bg-white dark:bg-darkcard rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden accordion-open transition-colors">
+                <button onclick="toggleAccordion('acc-savings')" class="w-full p-4 flex justify-between items-center bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition text-left border-l-4 border-tertiary">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-100 text-tertiary flex items-center justify-center"><i class="fas fa-piggy-bank"></i></div>
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 text-tertiary dark:text-emerald-300 flex items-center justify-center"><i class="fas fa-piggy-bank"></i></div>
                         <div>
-                            <h3 class="font-bold text-gray-800 text-sm">Ahorro</h3>
-                            <p class="text-[10px] text-gray-500 font-medium">Histórico</p>
+                            <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm">Ahorro</h3>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Histórico</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-tertiary text-lg" id="headerTotalSavings">$0.00</span>
-                        <i class="fas fa-chevron-down text-gray-400 accordion-icon"></i>
+                        <span class="font-bold text-tertiary dark:text-emerald-400 text-lg" id="headerTotalSavings">$0.00</span>
+                        <i class="fas fa-chevron-down text-gray-400 dark:text-gray-500 accordion-icon"></i>
                     </div>
                 </button>
-                
                 <div class="accordion-content">
-                    <div class="p-6 border-t border-gray-100">
-                        <!-- Tarjeta del Mes Actual -->
+                    <div class="p-6 border-t border-gray-100 dark:border-slate-700">
                         <div class="mb-4">
-                            <p class="text-xs font-bold text-gray-400 uppercase mb-2">Este Mes</p>
-                            <div class="rounded-xl p-4 flex justify-between items-center bg-emerald-50 border border-emerald-100">
-                                <span class="text-emerald-700 font-medium">Sobrante Actual</span>
-                                <span class="text-2xl font-bold text-emerald-600" id="balanceSavings">$0.00</span>
+                            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">Este Mes</p>
+                            <div class="rounded-xl p-4 flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800">
+                                <span class="text-emerald-700 dark:text-emerald-300 font-medium">Sobrante Actual</span>
+                                <span class="text-2xl font-bold text-emerald-600 dark:text-emerald-400" id="balanceSavings">$0.00</span>
                             </div>
                         </div>
-
-                        <!-- Tarjeta Histórica (Acumulado) -->
                         <div>
-                            <p class="text-xs font-bold text-gray-400 uppercase mb-2">Total Reunido (Todos los meses)</p>
+                            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase mb-2">Total Reunido</p>
                             <div class="rounded-xl p-6 flex flex-col sm:flex-row justify-between items-center gap-4 savings-gradient text-white shadow-lg shadow-tertiary/20 text-center sm:text-left">
-                                <div>
-                                    <p class="text-xs opacity-80 mb-1 uppercase tracking-wider">Ahorro Histórico Acumulado</p>
-                                    <h2 class="text-4xl font-bold break-all tracking-tight" id="globalAccumulated">$0.00</h2>
-                                </div>
-                                <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm animate-pulse">
-                                    <i class="fas fa-gem text-3xl"></i>
-                                </div>
+                                <div><p class="text-xs opacity-80 mb-1 uppercase tracking-wider">Ahorro Histórico Acumulado</p><h2 class="text-4xl font-bold break-all tracking-tight" id="globalAccumulated">$0.00</h2></div>
+                                <div class="bg-white/20 p-3 rounded-lg backdrop-blur-sm animate-pulse"><i class="fas fa-gem text-3xl"></i></div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- AREA DE TRABAJO -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col lg:flex-row min-h-[500px]">
+        <!-- FORMULARIO & TABLA -->
+        <div class="bg-white dark:bg-darkcard rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col lg:flex-row min-h-[500px] transition-colors">
             
             <!-- Formulario -->
-            <div class="w-full lg:w-1/3 bg-gray-50 p-6 border-r border-gray-200 flex flex-col gap-5">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+            <div class="w-full lg:w-1/3 bg-gray-50 dark:bg-slate-800/30 p-6 border-r border-gray-200 dark:border-slate-700 flex flex-col gap-5">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center">
                     <i class="fas fa-receipt text-primary mr-2"></i> Nuevo Gasto
                 </h3>
-                
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">¿De dónde sale el dinero?</label>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-2">¿De dónde sale el dinero?</label>
                     <div class="grid grid-cols-2 gap-2">
                         <label class="cursor-pointer">
                             <input type="radio" name="source" value="salary" checked class="peer sr-only" onchange="updateFormColor()">
-                            <div class="radio-box-primary p-3 rounded-lg border-2 border-gray-200 text-center hover:bg-gray-100 transition text-gray-500">
-                                <i class="fas fa-briefcase mb-1"></i><br><span class="text-xs font-bold">Sueldo</span>
-                            </div>
+                            <div class="radio-box-primary p-3 rounded-lg border-2 border-gray-200 dark:border-slate-600 text-center hover:bg-gray-100 dark:hover:bg-slate-700 transition text-gray-500 dark:text-gray-400"><i class="fas fa-briefcase mb-1"></i><br><span class="text-xs font-bold">Sueldo</span></div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="source" value="bonus" class="peer sr-only" onchange="updateFormColor()">
-                            <div class="radio-box-secondary p-3 rounded-lg border-2 border-gray-200 text-center hover:bg-gray-100 transition text-gray-500">
-                                <i class="fas fa-qrcode mb-1"></i><br><span class="text-xs font-bold">Bono MP</span>
-                            </div>
+                            <div class="radio-box-secondary p-3 rounded-lg border-2 border-gray-200 dark:border-slate-600 text-center hover:bg-gray-100 dark:hover:bg-slate-700 transition text-gray-500 dark:text-gray-400"><i class="fas fa-qrcode mb-1"></i><br><span class="text-xs font-bold">Bono MP</span></div>
                         </label>
                     </div>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Concepto</label>
-                    <input type="text" id="expenseName" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white" placeholder="Ej: Supermercado...">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Concepto</label>
+                    <input type="text" id="expenseName" class="w-full p-3 rounded-lg border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white dark:bg-slate-700 dark:text-white" placeholder="Ej: Supermercado...">
                 </div>
-
                 <div class="flex gap-2">
                     <div class="w-2/3">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Monto</label>
-                        <input type="text" inputmode="decimal" id="expenseAmount" 
-                               class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white" 
-                               placeholder="0.00" onfocus="unformatElement(this)" onblur="formatElement(this)" onkeypress="return isNumberKey(event)">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Monto</label>
+                        <input type="text" inputmode="decimal" id="expenseAmount" class="w-full p-3 rounded-lg border border-gray-300 dark:border-slate-600 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white dark:bg-slate-700 dark:text-white" placeholder="0.00" onfocus="unformatElement(this)" onblur="formatElement(this)" onkeypress="return isNumberKey(event)">
                     </div>
                     <div class="w-1/3">
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Icono</label>
-                        <select id="expenseIcon" onchange="this.classList.remove('text-gray-400'); this.classList.add('text-gray-800');" class="w-full p-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-primary outline-none text-gray-400 cursor-pointer appearance-none text-center">
-                            <option value="" disabled selected>Elegir</option>
-                            <option value="🛒">🛒</option> <option value="🏠">🏠</option> <option value="🚗">🚗</option>
-                            <option value="💊">💊</option> <option value="🍔">🍔</option> <option value="💳">💳</option>
-                            <option value="💡">💡</option>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Icono</label>
+                        <select id="expenseIcon" onchange="this.classList.remove('text-gray-400'); this.classList.add('text-gray-800'); this.classList.add('dark:text-white');" class="w-full p-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 focus:ring-2 focus:ring-primary outline-none text-gray-400 cursor-pointer appearance-none text-center dark:text-gray-300">
+                            <option value="" disabled selected>Elegir</option> <option value="🛒">🛒</option> <option value="🏠">🏠</option> <option value="🚗">🚗</option> <option value="💊">💊</option> <option value="🍔">🍔</option> <option value="💳">💳</option> <option value="💡">💡</option>
                         </select>
                     </div>
                 </div>
-
-                <button id="addBtn" onclick="addExpense()" class="mt-auto w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 shadow-primary/30">
-                    Registrar Gasto
-                </button>
+                <button id="addBtn" onclick="addExpense()" class="mt-auto w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 shadow-primary/30">Registrar Gasto</button>
             </div>
 
             <!-- Tabla -->
-            <div class="w-full lg:w-2/3 flex flex-col">
-                <div class="p-4 bg-white border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
-                    <h3 class="font-bold text-gray-700 text-sm sm:text-base" id="historyTitle">Movimientos del Mes</h3>
-                    <div class="text-xs text-gray-400 text-right bg-gray-50 px-3 py-1 rounded-md border border-gray-100">
-                        Total: <span class="font-bold text-gray-800 block sm:inline" id="totalSpentGlobal">$0.00</span>
+            <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-darkcard transition-colors">
+                <div class="p-4 bg-white dark:bg-darkcard border-b border-gray-100 dark:border-slate-700 flex justify-between items-center sticky top-0 z-10 gap-2 transition-colors">
+                    <div class="flex-1"><h3 class="font-bold text-gray-700 dark:text-gray-200 text-sm sm:text-base" id="historyTitle">Movimientos del Mes</h3></div>
+                    <div>
+                        <select id="categoryFilter" onchange="renderExpenses()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 text-xs rounded-lg p-2 outline-none focus:border-primary cursor-pointer">
+                            <option value="all">Todos</option> <option value="🛒">Super</option> <option value="🏠">Casa</option> <option value="🚗">Transp.</option> <option value="💊">Salud</option> <option value="🍔">Comida</option> <option value="💳">Tarjeta</option> <option value="💡">Servic.</option>
+                        </select>
+                    </div>
+                    <div class="text-xs text-gray-400 dark:text-gray-500 text-right bg-gray-50 dark:bg-slate-700/50 px-3 py-1 rounded-md border border-gray-100 dark:border-slate-700 hidden sm:block">
+                        Total: <span class="font-bold text-gray-800 dark:text-gray-200" id="totalSpentGlobal">$0.00</span>
                     </div>
                 </div>
-
-                <div class="overflow-y-auto flex-grow custom-scrollbar bg-white">
+                <div class="overflow-y-auto flex-grow custom-scrollbar">
                     <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase sticky top-0">
+                        <thead class="bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-gray-400 text-xs uppercase sticky top-0">
                             <tr>
                                 <th class="p-3 sm:p-4">Tipo</th>
                                 <th class="p-3 sm:p-4 w-1/2">Concepto</th>
@@ -238,36 +220,96 @@
                                 <th class="p-3 sm:p-4 text-center"></th>
                             </tr>
                         </thead>
-                        <tbody id="expenseList" class="divide-y divide-gray-100 text-sm sm:text-base"></tbody>
+                        <tbody id="expenseList" class="divide-y divide-gray-100 dark:divide-slate-700 text-sm sm:text-base"></tbody>
                     </table>
-                    <div id="emptyState" class="hidden flex flex-col items-center justify-center h-40 text-gray-300">
-                        <i class="fas fa-calendar-day text-4xl mb-2 text-gray-200"></i>
-                        <p class="text-sm font-medium">Sin movimientos este mes</p>
-                    </div>
+                    <div id="emptyState" class="hidden flex flex-col items-center justify-center h-40 text-gray-300 dark:text-slate-600"><i class="fas fa-calendar-day text-4xl mb-2 text-gray-200 dark:text-slate-700"></i><p class="text-sm font-medium">Sin movimientos este mes</p></div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- MODALES -->
+    <!-- MODAL CONFIRMACIÓN BORRAR -->
     <div id="deleteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4">
-            <div class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-trash-alt text-xl"></i></div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Estás segura?</h3>
-            <p class="text-sm text-gray-500 mb-6">Vas a borrar este gasto de la lista.</p>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-trash-alt text-xl"></i></div>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">¿Estás segura?</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Vas a borrar este gasto de la lista.</p>
             <div class="flex gap-3 justify-center">
-                <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition text-sm">Cancelar</button>
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition text-sm">Cancelar</button>
                 <button onclick="confirmDelete()" class="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg shadow-red-500/30 transition text-sm">Borrar</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL EDICIÓN CON SELECTOR DE ORIGEN -->
+    <div id="editModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center modal-enter mx-4">
+            <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 text-blue-500 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-pen text-xl"></i></div>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Editar Gasto</h3>
+            
+            <div class="space-y-3 text-left">
+                <!-- NUEVO: Selector de Origen -->
+                <div>
+                    <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase mb-1">Origen del Dinero</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="editSource" value="salary" class="peer sr-only">
+                            <div class="p-2 border border-gray-300 dark:border-slate-600 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400 peer-checked:bg-indigo-100 peer-checked:text-indigo-600 peer-checked:border-indigo-500 dark:peer-checked:bg-indigo-900 dark:peer-checked:text-indigo-300 dark:peer-checked:border-indigo-700 transition">
+                                Sueldo
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="editSource" value="bonus" class="peer sr-only">
+                            <div class="p-2 border border-gray-300 dark:border-slate-600 rounded-lg text-center text-sm text-gray-500 dark:text-gray-400 peer-checked:bg-sky-100 peer-checked:text-sky-600 peer-checked:border-sky-500 dark:peer-checked:bg-sky-900 dark:peer-checked:text-sky-300 dark:peer-checked:border-sky-700 transition">
+                                Bono
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Concepto</label>
+                    <input type="text" id="editName" class="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg text-sm">
+                </div>
+                <div class="flex gap-2">
+                    <div class="w-2/3">
+                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Monto</label>
+                        <input type="text" inputmode="decimal" id="editAmount" class="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg text-sm">
+                    </div>
+                    <div class="w-1/3">
+                        <label class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Icono</label>
+                        <select id="editIcon" class="w-full p-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg text-sm text-center">
+                            <option value="🛒">🛒</option> <option value="🏠">🏠</option> <option value="🚗">🚗</option>
+                            <option value="💊">💊</option> <option value="🍔">🍔</option> <option value="💳">💳</option> <option value="💡">💡</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-3 justify-center mt-6">
+                <button onclick="closeEditModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 rounded-xl font-semibold transition text-sm">Cancelar</button>
+                <button onclick="saveEdit()" class="px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/30 transition text-sm">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ÉXITO -->
     <div id="successModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4">
-            <div class="w-14 h-14 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl"></i></div>
-            <h3 class="text-lg font-bold text-gray-800 mb-2">¡Descarga Lista!</h3>
-            <p class="text-sm text-gray-500 mb-6">Tu reporte se ha guardado correctamente.</p>
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4">
+            <div class="w-14 h-14 bg-green-100 dark:bg-green-900/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-check text-2xl"></i></div>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">¡Descarga Lista!</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Tu reporte se ha guardado correctamente.</p>
             <button onclick="closeSuccessModal()" class="w-full px-5 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold shadow-lg shadow-green-500/30 transition text-sm">Entendido</button>
+        </div>
+    </div>
+
+    <!-- POPUP AVISO LÍMITE -->
+    <div id="antLimitModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4 border-t-4 border-red-500">
+            <div class="w-14 h-14 bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-exclamation-triangle text-2xl"></i></div>
+            <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-2">¡Alto ahí!</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Tus gastos hormiga han superado los <strong>$100,000</strong>. Te dejaremos una alerta arriba como recordatorio.</p>
+            <button onclick="document.getElementById('antLimitModal').classList.add('hidden')" class="w-full px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg shadow-red-500/30 transition text-sm">Entendido, me calmo</button>
         </div>
     </div>
 

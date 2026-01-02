@@ -1,5 +1,6 @@
         // --- VARIABLES TAILWIND ---
-            tailwind.config = {
+        tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -7,20 +8,39 @@
                         secondary: 'var(--color-secondary)',
                         tertiary: 'var(--color-tertiary)',
                         bg: 'var(--color-bg)',
+                        darkbg: '#0f172a', 
+                        darkcard: '#1e293b', 
                     },
                     screens: { 'xs': '360px' }
                 }
             }
         }
-        
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
         let currentData = { salary: 0, bonus: 0, items: [] };
         let currentYearMonth = ""; 
         let itemToDeleteId = null; 
+        let itemToEditId = null; 
+        
         const elMonthPicker = document.getElementById('monthPicker');
         const elSalaryInput = document.getElementById('salaryInput');
         const elBonusInput = document.getElementById('bonusInput');
         const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
         
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.theme = 'light';
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.theme = 'dark';
+            }
+        }
+
         function parseCurrency(str) {
             if (!str) return 0;
             const cleanStr = str.toString().replace(/[^0-9.]/g, '');
@@ -94,10 +114,8 @@
             loadMonthData();
         }
 
-        // --- CÁLCULO DE AHORRO HISTÓRICO ---
         function calculateAccumulated() {
             let total = 0;
-            // Iterar todo el localStorage
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key.startsWith('finance_')) {
@@ -112,6 +130,27 @@
             return total;
         }
 
+        function getAntTotal() {
+            const majorIcons = ['🏠', '🛒', '🚗', '💳'];
+            return currentData.items
+                .filter(item => !majorIcons.includes(item.icon))
+                .reduce((acc, item) => acc + item.amount, 0);
+        }
+
+        function checkAntExpenses() {
+            const antTotal = getAntTotal();
+            const alertBox = document.getElementById('antExpenseAlert');
+            const totalSpan = document.getElementById('antTotalDisplay');
+            const limit = 100000;
+
+            if (antTotal > limit) {
+                totalSpan.innerText = money.format(antTotal);
+                alertBox.classList.remove('hidden');
+            } else {
+                alertBox.classList.add('hidden');
+            }
+        }
+
         function updateDashboard() {
             saveMonthData();
             const spentSalary = currentData.items.filter(i => i.source === 'salary').reduce((acc, i) => acc + i.amount, 0);
@@ -121,7 +160,6 @@
             const balBonus = currentData.bonus - spentBonus;
             const totalAvailable = balSalary + balBonus;
 
-            // Lógica Visual: Tachar input si el saldo es 0 o menor
             if (balSalary <= 0 && currentData.salary > 0) { elSalaryInput.classList.add('spent-out'); } else { elSalaryInput.classList.remove('spent-out'); }
             if (balBonus <= 0 && currentData.bonus > 0) { elBonusInput.classList.add('spent-out'); } else { elBonusInput.classList.remove('spent-out'); }
 
@@ -137,14 +175,13 @@
 
             document.getElementById('balanceSavings').innerText = money.format(totalAvailable);
             
-            // Mostrar Total Acumulado (Histórico)
             const grandTotal = calculateAccumulated();
             document.getElementById('globalAccumulated').innerText = money.format(grandTotal);
-            
-            // Header del acordeón de ahorro muestra el Acumulado Total para motivar más
             document.getElementById('headerTotalSavings').innerText = money.format(grandTotal);
 
             document.getElementById('totalSpentGlobal').innerText = money.format(spentSalary + spentBonus);
+
+            checkAntExpenses();
         }
 
         function addExpense() {
@@ -164,6 +201,11 @@
 
             currentData.items.unshift({ id: Date.now(), name, amount, icon, source, date: new Date().toLocaleDateString() });
             
+            const newTotal = getAntTotal();
+            if (newTotal > 100000) {
+                document.getElementById('antLimitModal').classList.remove('hidden');
+            }
+
             document.getElementById('expenseName').value = '';
             document.getElementById('expenseAmount').value = ''; 
             document.getElementById('expenseIcon').value = "";
@@ -186,24 +228,90 @@
             }
         }
 
+        function openEditModal(id) {
+            const item = currentData.items.find(i => i.id === id);
+            if (!item) return;
+            itemToEditId = id;
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editAmount').value = item.amount;
+            document.getElementById('editIcon').value = item.icon;
+            
+            // Set radio button for source
+            const radios = document.getElementsByName('editSource');
+            for(const r of radios) {
+                if(r.value === item.source) r.checked = true;
+            }
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            itemToEditId = null;
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function saveEdit() {
+            const newName = document.getElementById('editName').value.trim();
+            const newAmount = parseCurrency(document.getElementById('editAmount').value);
+            const newIcon = document.getElementById('editIcon').value;
+            let newSource = 'salary';
+            const radios = document.getElementsByName('editSource');
+            for(const r of radios) if(r.checked) newSource = r.value;
+
+            if (!newName || isNaN(newAmount) || newAmount <= 0) {
+                alert("Por favor revisa los datos");
+                return;
+            }
+
+            const itemIndex = currentData.items.findIndex(i => i.id === itemToEditId);
+            if (itemIndex > -1) {
+                currentData.items[itemIndex].name = newName;
+                currentData.items[itemIndex].amount = newAmount;
+                currentData.items[itemIndex].icon = newIcon;
+                currentData.items[itemIndex].source = newSource;
+                
+                updateDashboard();
+                renderExpenses();
+                closeEditModal();
+            }
+        }
+
         function renderExpenses() {
+            const filterVal = document.getElementById('categoryFilter').value;
             const list = document.getElementById('expenseList');
             list.innerHTML = '';
             const emptyState = document.getElementById('emptyState');
-            if (currentData.items.length === 0) { emptyState.classList.remove('hidden'); return; }
+
+            let itemsToShow = currentData.items;
+            if (filterVal !== 'all') {
+                itemsToShow = currentData.items.filter(item => item.icon === filterVal);
+            }
+
+            if (itemsToShow.length === 0) {
+                emptyState.classList.remove('hidden');
+                if (currentData.items.length > 0) {
+                    emptyState.querySelector('p').innerText = "No hay gastos de este tipo";
+                } else {
+                    emptyState.querySelector('p').innerText = "Sin movimientos este mes";
+                }
+                return;
+            }
             emptyState.classList.add('hidden');
 
-            currentData.items.forEach(item => {
+            itemsToShow.forEach(item => {
                 const isBonus = item.source === 'bonus';
                 const label = isBonus ? "Bono" : "Sueldo";
                 const colorVar = isBonus ? "var(--color-secondary)" : "var(--color-primary)";
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-gray-50 fade-in border-b border-gray-50 group';
+                row.className = 'hover:bg-gray-50 dark:hover:bg-slate-800 fade-in border-b border-gray-50 dark:border-slate-700 group';
                 row.innerHTML = `
                     <td class="p-3 sm:p-4 align-middle"><div class="flex flex-col items-center"><span class="text-xl mb-1">${item.icon}</span><span class="px-2 py-1 text-[10px] rounded-md font-bold text-white opacity-80" style="background-color: ${colorVar}">${label}</span></div></td>
-                    <td class="p-3 sm:p-4 align-middle"><div class="font-medium text-gray-700 leading-tight">${item.name}</div><div class="text-[10px] text-gray-400">${item.date}</div></td>
+                    <td class="p-3 sm:p-4 align-middle"><div class="font-medium text-gray-700 dark:text-gray-200 leading-tight">${item.name}</div><div class="text-[10px] text-gray-400 dark:text-gray-500">${item.date}</div></td>
                     <td class="p-3 sm:p-4 text-right font-bold" style="color: ${colorVar}">-${money.format(item.amount)}</td>
-                    <td class="p-3 sm:p-4 text-center"><button onclick="openDeleteModal(${item.id})" class="text-gray-400 hover:text-red-500 transition px-2"><i class="fas fa-trash-alt"></i></button></td>
+                    <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+                        <button onclick="openEditModal(${item.id})" class="text-gray-400 hover:text-blue-500 transition px-1"><i class="fas fa-pen"></i></button>
+                        <button onclick="openDeleteModal(${item.id})" class="text-gray-400 hover:text-red-500 transition px-1"><i class="fas fa-trash-alt"></i></button>
+                    </td>
                 `;
                 list.appendChild(row);
             });
@@ -227,7 +335,7 @@
             const balS = currentData.salary - spentS;
             const balB = currentData.bonus - spentB;
             const totalSav = balS + balB;
-            const totalHist = calculateAccumulated(); // Agregado al PDF
+            const totalHist = calculateAccumulated();
 
             const rows = currentData.items.map(i => `
                 <tr style="border-bottom:1px solid #eee"><td style="padding:10px;color:#666;font-size:12px">${i.date}</td>
