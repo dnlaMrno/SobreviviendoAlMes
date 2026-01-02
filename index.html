@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+ <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Librería PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <title>Mi Dashboard Sobreviviendo al Mes</title>
+</head>
+<body class="min-h-screen flex flex-col relative">
+
+    <!-- Navbar -->
+    <nav class="glass-header sticky top-0 z-40 border-b border-gray-200 shadow-sm py-3">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start">
+                <div class="bg-primary text-white p-2 rounded-lg shadow-md shadow-primary/30"><i class="fas fa-chart-line"></i></div>
+                <h1 class="text-xl font-bold tracking-tight text-gray-800">Sobrevi<span class="text-primary">viendo al Mes</span></h1>
+            </div>
+            
+            <div class="flex gap-3 items-center w-full sm:w-auto justify-center">
+                <div class="flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+                    <button onclick="changeMonth(-1)" class="p-2 hover:bg-white rounded-md text-gray-600 transition"><i class="fas fa-chevron-left"></i></button>
+                    <input type="month" id="monthPicker" class="bg-transparent border-none font-bold text-gray-700 focus:ring-0 cursor-pointer mx-2 outline-none" onchange="loadMonthData()">
+                    <button onclick="changeMonth(1)" class="p-2 hover:bg-white rounded-md text-gray-600 transition"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <button onclick="generatePDF()" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm font-semibold transition shadow-md flex items-center gap-2">
+                    <i class="fas fa-file-pdf"></i> <span class="hidden sm:inline">PDF</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-6 z-10">
+        
+        <!-- Tarjetas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Sueldo -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-800 flex items-center"><i class="fas fa-briefcase mr-2 text-primary"></i> Sueldo / Principal</h3>
+                </div>
+                <div class="p-6">
+                    <label class="text-xs font-semibold text-gray-400 uppercase">Ingreso Mensual</label>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-xl text-gray-400">$</span>
+                        <input type="number" id="salaryInput" class="w-full text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-primary outline-none bg-transparent placeholder-gray-300 transition-colors" placeholder="0" oninput="updateDashboard()">
+                    </div>
+                    
+                    <div class="rounded-xl p-4 flex justify-between items-end salary-gradient text-white shadow-lg shadow-primary/20">
+                        <div>
+                            <p class="text-xs opacity-80 mb-1">Disponible Sueldo</p>
+                            <h2 class="text-2xl font-bold" id="balanceSalary">$0.00</h2>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs opacity-60">Gastado</p>
+                            <p class="font-medium text-white/90" id="spentSalary">-$0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bono -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden relative">
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-800 flex items-center"><i class="fas fa-hand-holding-usd mr-2 text-secondary"></i> Bono / Extra</h3>
+                </div>
+                <div class="p-6">
+                    <label class="text-xs font-semibold text-gray-400 uppercase">Monto del Bono</label>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="text-xl text-gray-400">$</span>
+                        <input type="number" id="bonusInput" class="w-full text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-secondary outline-none bg-transparent placeholder-gray-300 transition-colors" placeholder="0" oninput="updateDashboard()">
+                    </div>
+                    
+                    <div class="rounded-xl p-4 flex justify-between items-end mp-gradient text-white shadow-lg shadow-secondary/20">
+                        <div>
+                            <p class="text-xs opacity-80 mb-1">Disponible Bono</p>
+                            <h2 class="text-2xl font-bold" id="balanceBonus">$0.00</h2>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs opacity-60">Gastado</p>
+                            <p class="font-medium text-white/90" id="spentBonus">-$0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario y Tabla -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col lg:flex-row min-h-[500px]">
+            
+            <!-- Formulario -->
+            <div class="w-full lg:w-1/3 bg-gray-50 p-6 border-r border-gray-200 flex flex-col gap-5">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-receipt text-primary mr-2"></i> Nuevo Gasto
+                </h3>
+                
+                <!-- Origen -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">¿De dónde sale el dinero?</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="source" value="salary" checked class="peer sr-only" onchange="updateFormColor()">
+                            <div class="radio-box-primary p-3 rounded-lg border-2 border-gray-200 text-center hover:bg-gray-100 transition text-gray-500">
+                                <i class="fas fa-briefcase mb-1"></i><br><span class="text-xs font-bold">Sueldo</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="source" value="bonus" class="peer sr-only" onchange="updateFormColor()">
+                            <div class="radio-box-secondary p-3 rounded-lg border-2 border-gray-200 text-center hover:bg-gray-100 transition text-gray-500">
+                                <i class="fas fa-qrcode mb-1"></i><br><span class="text-xs font-bold">Bono MP</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Inputs -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Concepto</label>
+                    <input type="text" id="expenseName" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white" placeholder="Ej: Supermercado...">
+                </div>
+
+                <div class="flex gap-2">
+                    <div class="w-2/3">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Monto</label>
+                        <input type="number" id="expenseAmount" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white" placeholder="0.00">
+                    </div>
+                    <div class="w-1/3">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Icono</label>
+                        <!-- Selector arreglado: "Elegir" -->
+                        <select id="expenseIcon" 
+                                onchange="this.classList.remove('text-gray-400'); this.classList.add('text-gray-800');"
+                                class="w-full p-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-primary outline-none text-gray-400 cursor-pointer appearance-none text-center">
+                            <option value="" disabled selected>Elegir</option>
+                            <option value="🛒">🛒</option>
+                            <option value="🏠">🏠</option>
+                            <option value="🚗">🚗</option>
+                            <option value="💊">💊</option>
+                            <option value="🍔">🍔</option>
+                            <option value="💳">💳</option>
+                            <option value="💡">💡</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="addBtn" onclick="addExpense()" class="mt-auto w-full bg-primary hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95 shadow-primary/30">
+                    Registrar Gasto
+                </button>
+            </div>
+
+            <!-- Tabla -->
+            <div class="w-full lg:w-2/3 flex flex-col">
+                <div class="p-4 bg-white border-b border-gray-100 flex justify-between items-center sticky top-0 z-10">
+                    <h3 class="font-bold text-gray-700 text-sm sm:text-base" id="historyTitle">Movimientos del Mes</h3>
+                    <div class="text-xs text-gray-400 text-right bg-gray-50 px-3 py-1 rounded-md border border-gray-100">
+                        Total: <span class="font-bold text-gray-800 block sm:inline" id="totalSpentGlobal">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="overflow-y-auto flex-grow custom-scrollbar bg-white">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 text-gray-500 text-xs uppercase sticky top-0">
+                            <tr>
+                                <th class="p-3 sm:p-4">Tipo</th>
+                                <th class="p-3 sm:p-4 w-1/2">Concepto</th>
+                                <th class="p-3 sm:p-4 text-right">Monto</th>
+                                <th class="p-3 sm:p-4 text-center"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseList" class="divide-y divide-gray-100 text-sm sm:text-base">
+                            <!-- JS llenará esto -->
+                        </tbody>
+                    </table>
+                    
+                    <div id="emptyState" class="hidden flex flex-col items-center justify-center h-40 text-gray-300">
+                        <i class="fas fa-calendar-day text-4xl mb-2 text-gray-200"></i>
+                        <p class="text-sm font-medium">Sin movimientos este mes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL DE CONFIRMACIÓN (NUEVO) -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4">
+            <div class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-trash-alt text-xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800 mb-2">¿Estás segura?</h3>
+            <p class="text-sm text-gray-500 mb-6">Vas a borrar este gasto de la lista. No se puede deshacer.</p>
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeDeleteModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition text-sm">
+                    No, Cancelar
+                </button>
+                <button onclick="confirmDelete()" class="px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg shadow-red-500/30 transition text-sm">
+                    Sí, Borrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+        /* --- TU PALETA DE COLORES (EDITA AQUÍ) --- */
+        :root {
+            --color-primary: #4F46E5;   /* Color Principal (Sueldo) */
+            --color-secondary: #0EA5E9; /* Color Secundario (Bono) */
+            
+            --color-bg: #f3f4f6;        /* Fondo Página */
+            --text-dark: #1f2937;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg); color: var(--text-dark); }
+        
+        /* Animaciones */
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .modal-enter { animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #c7c7c7; border-radius: 4px; }
+        
+        /* Header Cristal */
+        .glass-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        
+        /* Gradientes */
+        .salary-gradient { background: linear-gradient(135deg, var(--color-primary) 0%, #312e81 100%); }
+        .mp-gradient { background: linear-gradient(135deg, var(--color-secondary) 0%, #005f8f 100%); }
+
+        /* Radio Buttons */
+        input:checked + div.radio-box-primary {
+            border-color: var(--color-primary);
+            background-color: rgba(79, 70, 229, 0.1); 
+            color: var(--color-primary);
+        }
+        input:checked + div.radio-box-secondary {
+            border-color: var(--color-secondary);
+            background-color: rgba(14, 165, 233, 0.1);
+            color: var(--color-secondary);
+        }
