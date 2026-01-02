@@ -1,4 +1,4 @@
-        // --- VARIABLES TAILDWIN ---
+        // --- VARIABLES TAILWIND ---
         tailwind.config = {
             theme: {
                 extend: {
@@ -6,15 +6,18 @@
                         primary: 'var(--color-primary)',
                         secondary: 'var(--color-secondary)',
                         bg: 'var(--color-bg)',
+                    },
+                    screens: {
+                        'xs': '360px', // Breakpoint extra pequeño
                     }
                 }
             }
         }
         
-        // --- VARIABLES GLOBALES ---
+         // --- VARIABLES GLOBALES ---
         let currentData = { salary: 0, bonus: 0, items: [] };
         let currentYearMonth = ""; 
-        let itemToDeleteId = null; // Variable para saber qué vamos a borrar
+        let itemToDeleteId = null; 
 
         // --- ELEMENTOS ---
         const elMonthPicker = document.getElementById('monthPicker');
@@ -22,6 +25,35 @@
         const elBonusInput = document.getElementById('bonusInput');
         const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
         
+        // --- UTILIDADES DE FORMATO ---
+        function parseCurrency(str) {
+            if (!str) return 0;
+            const cleanStr = str.toString().replace(/[^0-9.]/g, '');
+            return parseFloat(cleanStr) || 0;
+        }
+
+        function formatElement(el) {
+            const val = parseCurrency(el.value);
+            if (val === 0 && el.value === '') return;
+            el.value = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function unformatElement(el) {
+            const val = parseCurrency(el.value);
+            if (val === 0) {
+                el.value = '';
+                return;
+            }
+            el.value = val; 
+        }
+
+        function isNumberKey(evt) {
+            var charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode == 46) return true; 
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
+            return true;
+        }
+
         // --- INICIALIZACIÓN ---
         window.onload = () => {
             const now = new Date();
@@ -41,8 +73,12 @@
             const stored = localStorage.getItem(storageKey);
             currentData = stored ? JSON.parse(stored) : { salary: 0, bonus: 0, items: [] };
 
+            // Cargar y formatear visualmente
             elSalaryInput.value = currentData.salary > 0 ? currentData.salary : '';
+            formatElement(elSalaryInput);
+            
             elBonusInput.value = currentData.bonus > 0 ? currentData.bonus : '';
+            formatElement(elBonusInput);
 
             renderExpenses();
             updateDashboard();
@@ -50,8 +86,8 @@
 
         function saveMonthData() {
             const storageKey = `finance_${currentYearMonth}`;
-            currentData.salary = parseFloat(elSalaryInput.value) || 0;
-            currentData.bonus = parseFloat(elBonusInput.value) || 0;
+            currentData.salary = parseCurrency(elSalaryInput.value);
+            currentData.bonus = parseCurrency(elBonusInput.value);
             localStorage.setItem(storageKey, JSON.stringify(currentData));
         }
 
@@ -85,7 +121,7 @@
             const iconSelect = document.getElementById('expenseIcon');
             
             const name = nameInput.value.trim();
-            const amount = parseFloat(amountInput.value);
+            const amount = parseCurrency(amountInput.value);
             const icon = iconSelect.value;
             
             const sourceRadios = document.getElementsByName('source');
@@ -109,7 +145,7 @@
             
             // Limpiar y resetear
             nameInput.value = '';
-            amountInput.value = '';
+            amountInput.value = ''; 
             iconSelect.value = "";
             iconSelect.classList.remove('text-gray-800');
             iconSelect.classList.add('text-gray-400');
@@ -119,7 +155,7 @@
             updateDashboard();
         }
 
-        // --- FUNCIONES DEL POPUP MODAL ---
+        // --- POPUP MODAL ---
         function openDeleteModal(id) {
             itemToDeleteId = id;
             const modal = document.getElementById('deleteModal');

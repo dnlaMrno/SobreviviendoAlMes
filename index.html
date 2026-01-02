@@ -49,17 +49,25 @@
                     <label class="text-xs font-semibold text-gray-400 uppercase">Ingreso Mensual</label>
                     <div class="flex items-center gap-2 mb-4">
                         <span class="text-xl text-gray-400">$</span>
-                        <input type="number" id="salaryInput" class="w-full text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-primary outline-none bg-transparent placeholder-gray-300 transition-colors" placeholder="0" oninput="updateDashboard()">
+                        <!-- INPUT AJUSTADO: text-2xl en mobile, text-3xl en desktop -->
+                        <input type="text" inputmode="decimal" id="salaryInput" 
+                               class="w-full text-2xl sm:text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-primary outline-none bg-transparent placeholder-gray-300 transition-colors" 
+                               placeholder="0.00" 
+                               onfocus="unformatElement(this)" 
+                               onblur="formatElement(this); updateDashboard()"
+                               onkeypress="return isNumberKey(event)">
                     </div>
                     
-                    <div class="rounded-xl p-4 flex justify-between items-end salary-gradient text-white shadow-lg shadow-primary/20">
+                    <!-- CORRECCIÓN RESPONSIVE AQUÍ: Flex-col en móviles para apilar info -->
+                    <div class="rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-0 salary-gradient text-white shadow-lg shadow-primary/20">
                         <div>
                             <p class="text-xs opacity-80 mb-1">Disponible Sueldo</p>
-                            <h2 class="text-2xl font-bold" id="balanceSalary">$0.00</h2>
+                            <!-- break-all para evitar que números gigantes rompan el diseño -->
+                            <h2 class="text-2xl font-bold break-all" id="balanceSalary">$0.00</h2>
                         </div>
-                        <div class="text-right">
+                        <div class="text-left sm:text-right">
                             <p class="text-xs opacity-60">Gastado</p>
-                            <p class="font-medium text-white/90" id="spentSalary">-$0.00</p>
+                            <p class="font-medium text-white/90 break-all" id="spentSalary">-$0.00</p>
                         </div>
                     </div>
                 </div>
@@ -74,17 +82,24 @@
                     <label class="text-xs font-semibold text-gray-400 uppercase">Monto del Bono</label>
                     <div class="flex items-center gap-2 mb-4">
                         <span class="text-xl text-gray-400">$</span>
-                        <input type="number" id="bonusInput" class="w-full text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-secondary outline-none bg-transparent placeholder-gray-300 transition-colors" placeholder="0" oninput="updateDashboard()">
+                        <!-- INPUT AJUSTADO -->
+                        <input type="text" inputmode="decimal" id="bonusInput" 
+                               class="w-full text-2xl sm:text-3xl font-bold text-gray-800 border-b border-gray-200 focus:border-secondary outline-none bg-transparent placeholder-gray-300 transition-colors" 
+                               placeholder="0.00" 
+                               onfocus="unformatElement(this)" 
+                               onblur="formatElement(this); updateDashboard()"
+                               onkeypress="return isNumberKey(event)">
                     </div>
                     
-                    <div class="rounded-xl p-4 flex justify-between items-end mp-gradient text-white shadow-lg shadow-secondary/20">
+                    <!-- CORRECCIÓN RESPONSIVE AQUÍ -->
+                    <div class="rounded-xl p-4 flex flex-col sm:flex-row justify-between sm:items-end gap-3 sm:gap-0 mp-gradient text-white shadow-lg shadow-secondary/20">
                         <div>
                             <p class="text-xs opacity-80 mb-1">Disponible Bono</p>
-                            <h2 class="text-2xl font-bold" id="balanceBonus">$0.00</h2>
+                            <h2 class="text-2xl font-bold break-all" id="balanceBonus">$0.00</h2>
                         </div>
-                        <div class="text-right">
+                        <div class="text-left sm:text-right">
                             <p class="text-xs opacity-60">Gastado</p>
-                            <p class="font-medium text-white/90" id="spentBonus">-$0.00</p>
+                            <p class="font-medium text-white/90 break-all" id="spentBonus">-$0.00</p>
                         </div>
                     </div>
                 </div>
@@ -128,11 +143,15 @@
                 <div class="flex gap-2">
                     <div class="w-2/3">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Monto</label>
-                        <input type="number" id="expenseAmount" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white" placeholder="0.00">
+                        <input type="text" inputmode="decimal" id="expenseAmount" 
+                               class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary outline-none placeholder-gray-400 bg-white" 
+                               placeholder="0.00"
+                               onfocus="unformatElement(this)" 
+                               onblur="formatElement(this)"
+                               onkeypress="return isNumberKey(event)">
                     </div>
                     <div class="w-1/3">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Icono</label>
-                        <!-- Selector arreglado: "Elegir" -->
                         <select id="expenseIcon" 
                                 onchange="this.classList.remove('text-gray-400'); this.classList.add('text-gray-800');"
                                 class="w-full p-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-primary outline-none text-gray-400 cursor-pointer appearance-none text-center">
@@ -187,7 +206,7 @@
 
     </main>
 
-    <!-- MODAL DE CONFIRMACIÓN (NUEVO) -->
+    <!-- MODAL DE CONFIRMACIÓN -->
     <div id="deleteModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-xs text-center modal-enter mx-4">
             <div class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
