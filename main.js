@@ -5,48 +5,37 @@
                     colors: {
                         primary: 'var(--color-primary)',
                         secondary: 'var(--color-secondary)',
+                        tertiary: 'var(--color-tertiary)',
                         bg: 'var(--color-bg)',
                     },
-                    screens: {
-                        'xs': '360px',
-                    }
+                    screens: { 'xs': '360px' }
                 }
             }
         }
         
-         // --- VARIABLES GLOBALES ---
         let currentData = { salary: 0, bonus: 0, items: [] };
         let currentYearMonth = ""; 
         let itemToDeleteId = null; 
-
-        // --- ELEMENTOS ---
         const elMonthPicker = document.getElementById('monthPicker');
         const elSalaryInput = document.getElementById('salaryInput');
         const elBonusInput = document.getElementById('bonusInput');
         const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
         
-        // --- UTILIDADES DE FORMATO ---
         function parseCurrency(str) {
             if (!str) return 0;
             const cleanStr = str.toString().replace(/[^0-9.]/g, '');
             return parseFloat(cleanStr) || 0;
         }
-
         function formatElement(el) {
             const val = parseCurrency(el.value);
             if (val === 0 && el.value === '') return;
             el.value = val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
-
         function unformatElement(el) {
             const val = parseCurrency(el.value);
-            if (val === 0) {
-                el.value = '';
-                return;
-            }
+            if (val === 0) { el.value = ''; return; }
             el.value = val; 
         }
-
         function isNumberKey(evt) {
             var charCode = (evt.which) ? evt.which : evt.keyCode;
             if (charCode == 46) return true; 
@@ -54,7 +43,6 @@
             return true;
         }
 
-        // --- INICIALIZACIÓN ---
         window.onload = () => {
             const now = new Date();
             const year = now.getFullYear();
@@ -65,20 +53,25 @@
             updateFormColor();
         };
 
-        // --- GESTIÓN DE DATOS ---
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('accordion-open')) {
+                el.classList.remove('accordion-open');
+            } else {
+                el.classList.add('accordion-open');
+            }
+        }
+
         function loadMonthData() {
             currentYearMonth = elMonthPicker.value;
             if(!currentYearMonth) return;
             const storageKey = `finance_${currentYearMonth}`;
             const stored = localStorage.getItem(storageKey);
             currentData = stored ? JSON.parse(stored) : { salary: 0, bonus: 0, items: [] };
-
             elSalaryInput.value = currentData.salary > 0 ? currentData.salary : '';
             formatElement(elSalaryInput);
-            
             elBonusInput.value = currentData.bonus > 0 ? currentData.bonus : '';
             formatElement(elBonusInput);
-
             renderExpenses();
             updateDashboard();
         }
@@ -90,50 +83,77 @@
             localStorage.setItem(storageKey, JSON.stringify(currentData));
         }
 
-        // --- CORRECCIÓN CALENDARIO (ZONAS HORARIAS) ---
         function changeMonth(delta) {
             const parts = currentYearMonth.split('-');
             const currentY = parseInt(parts[0]);
             const currentM = parseInt(parts[1]);
-            
-            // Creamos fecha local para evitar saltos por zona horaria
-            // (año, mes 0-based, dia 1)
             const date = new Date(currentY, currentM - 1 + delta, 1);
-            
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
-            
             elMonthPicker.value = `${year}-${month}`;
             loadMonthData();
         }
 
-        // --- LÓGICA Y RENDER ---
+        // --- CÁLCULO DE AHORRO HISTÓRICO ---
+        function calculateAccumulated() {
+            let total = 0;
+            // Iterar todo el localStorage
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('finance_')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        const spent = (data.items || []).reduce((acc, item) => acc + item.amount, 0);
+                        const income = (data.salary || 0) + (data.bonus || 0);
+                        total += (income - spent);
+                    } catch(e) {}
+                }
+            }
+            return total;
+        }
+
         function updateDashboard() {
             saveMonthData();
             const spentSalary = currentData.items.filter(i => i.source === 'salary').reduce((acc, i) => acc + i.amount, 0);
             const spentBonus = currentData.items.filter(i => i.source === 'bonus').reduce((acc, i) => acc + i.amount, 0);
-
-            document.getElementById('balanceSalary').innerText = money.format(currentData.salary - spentSalary);
-            document.getElementById('spentSalary').innerText = "-" + money.format(spentSalary);
             
-            document.getElementById('balanceBonus').innerText = money.format(currentData.bonus - spentBonus);
+            const balSalary = currentData.salary - spentSalary;
+            const balBonus = currentData.bonus - spentBonus;
+            const totalAvailable = balSalary + balBonus;
+
+            // Lógica Visual: Tachar input si el saldo es 0 o menor
+            if (balSalary <= 0 && currentData.salary > 0) { elSalaryInput.classList.add('spent-out'); } else { elSalaryInput.classList.remove('spent-out'); }
+            if (balBonus <= 0 && currentData.bonus > 0) { elBonusInput.classList.add('spent-out'); } else { elBonusInput.classList.remove('spent-out'); }
+
+            document.getElementById('balanceSalary').innerText = money.format(balSalary);
+            document.getElementById('spentSalary').innerText = "-" + money.format(spentSalary);
+            document.getElementById('headerBalSalary').innerText = money.format(balSalary);
+            document.getElementById('headerBalSalaryDesktop').innerText = money.format(balSalary);
+            
+            document.getElementById('balanceBonus').innerText = money.format(balBonus);
             document.getElementById('spentBonus').innerText = "-" + money.format(spentBonus);
+            document.getElementById('headerBalBonus').innerText = money.format(balBonus);
+            document.getElementById('headerBalBonusDesktop').innerText = money.format(balBonus);
+
+            document.getElementById('balanceSavings').innerText = money.format(totalAvailable);
+            
+            // Mostrar Total Acumulado (Histórico)
+            const grandTotal = calculateAccumulated();
+            document.getElementById('globalAccumulated').innerText = money.format(grandTotal);
+            
+            // Header del acordeón de ahorro muestra el Acumulado Total para motivar más
+            document.getElementById('headerTotalSavings').innerText = money.format(grandTotal);
 
             document.getElementById('totalSpentGlobal').innerText = money.format(spentSalary + spentBonus);
         }
 
         function addExpense() {
-            const nameInput = document.getElementById('expenseName');
-            const amountInput = document.getElementById('expenseAmount');
-            const iconSelect = document.getElementById('expenseIcon');
-            
-            const name = nameInput.value.trim();
-            const amount = parseCurrency(amountInput.value);
-            const icon = iconSelect.value;
-            
-            const sourceRadios = document.getElementsByName('source');
+            const name = document.getElementById('expenseName').value.trim();
+            const amount = parseCurrency(document.getElementById('expenseAmount').value);
+            const icon = document.getElementById('expenseIcon').value;
             let source = 'salary';
-            for(const radio of sourceRadios) { if(radio.checked) source = radio.value; }
+            const radios = document.getElementsByName('source');
+            for(const r of radios) if(r.checked) source = r.value;
 
             if (!name || isNaN(amount) || amount <= 0 || !icon) {
                 const btn = document.getElementById('addBtn');
@@ -142,46 +162,27 @@
                 return;
             }
 
-            const newItem = {
-                id: Date.now(),
-                name, amount, icon, source, 
-                date: new Date().toLocaleDateString()
-            };
-
-            currentData.items.unshift(newItem);
+            currentData.items.unshift({ id: Date.now(), name, amount, icon, source, date: new Date().toLocaleDateString() });
             
-            nameInput.value = '';
-            amountInput.value = ''; 
-            iconSelect.value = "";
-            iconSelect.classList.remove('text-gray-800');
-            iconSelect.classList.add('text-gray-400');
-            nameInput.focus();
+            document.getElementById('expenseName').value = '';
+            document.getElementById('expenseAmount').value = ''; 
+            document.getElementById('expenseIcon').value = "";
+            document.getElementById('expenseIcon').classList.remove('text-gray-800');
+            document.getElementById('expenseIcon').classList.add('text-gray-400');
+            document.getElementById('expenseName').focus();
 
             renderExpenses();
             updateDashboard();
         }
 
-        // --- FUNCIONES MODALES ---
-        function openDeleteModal(id) {
-            itemToDeleteId = id;
-            document.getElementById('deleteModal').classList.remove('hidden');
-        }
-
-        function closeDeleteModal() {
-            itemToDeleteId = null;
-            document.getElementById('deleteModal').classList.add('hidden');
-        }
-
-        function closeSuccessModal() {
-            document.getElementById('successModal').classList.add('hidden');
-        }
-
+        function openDeleteModal(id) { itemToDeleteId = id; document.getElementById('deleteModal').classList.remove('hidden'); }
+        function closeDeleteModal() { itemToDeleteId = null; document.getElementById('deleteModal').classList.add('hidden'); }
+        function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
+        
         function confirmDelete() {
             if (itemToDeleteId !== null) {
                 currentData.items = currentData.items.filter(i => i.id !== itemToDeleteId);
-                renderExpenses();
-                updateDashboard();
-                closeDeleteModal();
+                renderExpenses(); updateDashboard(); closeDeleteModal();
             }
         }
 
@@ -189,146 +190,67 @@
             const list = document.getElementById('expenseList');
             list.innerHTML = '';
             const emptyState = document.getElementById('emptyState');
-
-            if (currentData.items.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
+            if (currentData.items.length === 0) { emptyState.classList.remove('hidden'); return; }
             emptyState.classList.add('hidden');
 
             currentData.items.forEach(item => {
                 const isBonus = item.source === 'bonus';
                 const label = isBonus ? "Bono" : "Sueldo";
                 const colorVar = isBonus ? "var(--color-secondary)" : "var(--color-primary)";
-                
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50 fade-in border-b border-gray-50 group';
                 row.innerHTML = `
-                    <td class="p-3 sm:p-4 align-middle">
-                        <div class="flex flex-col items-center">
-                            <span class="text-xl mb-1">${item.icon}</span>
-                            <span class="px-2 py-1 text-[10px] rounded-md font-bold text-white opacity-80" 
-                                  style="background-color: ${colorVar}">${label}</span>
-                        </div>
-                    </td>
-                    <td class="p-3 sm:p-4 align-middle">
-                        <div class="font-medium text-gray-700 leading-tight">${item.name}</div>
-                        <div class="text-[10px] text-gray-400">${item.date}</div>
-                    </td>
-                    <td class="p-3 sm:p-4 text-right font-bold" style="color: ${colorVar}">
-                        -${money.format(item.amount)}
-                    </td>
-                    <td class="p-3 sm:p-4 text-center">
-                        <button onclick="openDeleteModal(${item.id})" class="text-gray-400 hover:text-red-500 transition px-2">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
+                    <td class="p-3 sm:p-4 align-middle"><div class="flex flex-col items-center"><span class="text-xl mb-1">${item.icon}</span><span class="px-2 py-1 text-[10px] rounded-md font-bold text-white opacity-80" style="background-color: ${colorVar}">${label}</span></div></td>
+                    <td class="p-3 sm:p-4 align-middle"><div class="font-medium text-gray-700 leading-tight">${item.name}</div><div class="text-[10px] text-gray-400">${item.date}</div></td>
+                    <td class="p-3 sm:p-4 text-right font-bold" style="color: ${colorVar}">-${money.format(item.amount)}</td>
+                    <td class="p-3 sm:p-4 text-center"><button onclick="openDeleteModal(${item.id})" class="text-gray-400 hover:text-red-500 transition px-2"><i class="fas fa-trash-alt"></i></button></td>
                 `;
                 list.appendChild(row);
             });
         }
 
         function updateFormColor() {
-            const sourceRadios = document.getElementsByName('source');
             let source = 'salary';
-            for(const radio of sourceRadios) { if(radio.checked) source = radio.value; }
-            
+            const radios = document.getElementsByName('source');
+            for(const r of radios) if(r.checked) source = r.value;
             const btn = document.getElementById('addBtn');
             btn.className = "mt-auto w-full text-white font-bold py-3 px-4 rounded-xl shadow-lg transition transform active:scale-95";
-            
-            if (source === 'bonus') {
-                btn.style.backgroundColor = "var(--color-secondary)";
-                btn.style.boxShadow = "0 10px 15px -3px rgba(14, 165, 233, 0.3)";
-            } else {
-                btn.style.backgroundColor = "var(--color-primary)";
-                btn.style.boxShadow = "0 10px 15px -3px rgba(79, 70, 229, 0.3)";
-            }
+            if (source === 'bonus') { btn.style.backgroundColor = "var(--color-secondary)"; btn.style.boxShadow = "0 10px 15px -3px rgba(14, 165, 233, 0.3)"; }
+            else { btn.style.backgroundColor = "var(--color-primary)"; btn.style.boxShadow = "0 10px 15px -3px rgba(79, 70, 229, 0.3)"; }
         }
 
         document.getElementById('expenseAmount').addEventListener('keypress', (e) => { if (e.key === 'Enter') addExpense(); });
 
-        // --- PDF GENERATOR ---
         function generatePDF() {
-            const style = getComputedStyle(document.documentElement);
-            const cPrimary = style.getPropertyValue('--color-primary').trim();
-            const cSecondary = style.getPropertyValue('--color-secondary').trim();
+            const spentS = currentData.items.filter(i => i.source === 'salary').reduce((a,b)=>a+b.amount,0);
+            const spentB = currentData.items.filter(i => i.source === 'bonus').reduce((a,b)=>a+b.amount,0);
+            const balS = currentData.salary - spentS;
+            const balB = currentData.bonus - spentB;
+            const totalSav = balS + balB;
+            const totalHist = calculateAccumulated(); // Agregado al PDF
 
-            const spentSalary = currentData.items.filter(i => i.source === 'salary').reduce((a,b)=>a+b.amount,0);
-            const spentBonus = currentData.items.filter(i => i.source === 'bonus').reduce((a,b)=>a+b.amount,0);
-            const balSalary = currentData.salary - spentSalary;
-            const balBonus = currentData.bonus - spentBonus;
-
-            const rows = currentData.items.map(i => {
-                const color = i.source === 'bonus' ? cSecondary : cPrimary;
-                const label = i.source === 'bonus' ? 'BONO' : 'SUELDO';
-                return `
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px; color: #666; font-size: 12px;">${i.date}</td>
-                    <td style="padding: 10px;"><span style="color: ${color}; font-weight: bold; font-size: 10px; border: 1px solid ${color}; padding: 2px 5px; border-radius: 4px;">${label}</span></td>
-                    <td style="padding: 10px; font-size: 13px;">${i.icon} ${i.name}</td>
-                    <td style="padding: 10px; text-align: right; font-weight: bold; font-size: 13px;">-${money.format(i.amount)}</td>
-                </tr>`;
-            }).join('');
+            const rows = currentData.items.map(i => `
+                <tr style="border-bottom:1px solid #eee"><td style="padding:10px;color:#666;font-size:12px">${i.date}</td>
+                <td style="padding:10px"><span style="color:${i.source==='bonus'?'#0EA5E9':'#4F46E5'};font-weight:bold;font-size:10px;border:1px solid currentColor;padding:2px 5px;border-radius:4px">${i.source==='bonus'?'BONO':'SUELDO'}</span></td>
+                <td style="padding:10px;font-size:13px">${i.icon} ${i.name}</td><td style="padding:10px;text-align:right;font-weight:bold;font-size:13px">-${money.format(i.amount)}</td></tr>`
+            ).join('');
 
             const content = `
-                <div style="font-family: Arial, sans-serif; padding: 40px; background: white; color: #333;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 3px solid ${cPrimary}; padding-bottom: 20px; margin-bottom: 30px;">
-                        <div>
-                            <h1 style="margin:0; font-size: 24px; color: #111;">Reporte de Gastos</h1>
-                            <p style="margin:5px 0 0; color: #666;">Periodo: <strong>${currentYearMonth}</strong></p>
-                        </div>
-                        <div style="text-align: right;">
-                             <div style="background: #f3f4f6; padding: 10px; border-radius: 8px;">
-                                <div style="font-size: 10px; color: #888; text-transform: uppercase;">Total Gastado</div>
-                                <div style="font-size: 18px; font-weight: bold; color: #333;">${money.format(spentSalary + spentBonus)}</div>
-                             </div>
-                        </div>
+                <div style="font-family:Arial,sans-serif;padding:40px;background:white;color:#333">
+                    <div style="display:flex;justify-content:space-between;border-bottom:3px solid #4F46E5;padding-bottom:20px;margin-bottom:30px">
+                        <div><h1 style="margin:0;font-size:24px">Reporte Mensual</h1><p style="margin:5px 0 0;color:#666">Periodo: <strong>${currentYearMonth}</strong></p></div>
+                        <div style="text-align:right"><div style="background:#10B981;color:white;padding:10px;border-radius:8px"><div style="font-size:10px;text-transform:uppercase">Ahorro Histórico</div><div style="font-size:18px;font-weight:bold">${money.format(totalHist)}</div></div></div>
                     </div>
-
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 30px;">
-                        <tr>
-                            <td style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; width: 50%;">
-                                <div style="font-size: 11px; font-weight: bold; color: ${cPrimary};">CUENTA PRINCIPAL</div>
-                                <div style="font-size: 20px; font-weight: bold; margin: 5px 0;">${money.format(balSalary)}</div>
-                                <div style="font-size: 11px; color: #ef4444;">Gastado: -${money.format(spentSalary)}</div>
-                            </td>
-                            <td style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; width: 50%;">
-                                <div style="font-size: 11px; font-weight: bold; color: ${cSecondary};">CUENTA BONO</div>
-                                <div style="font-size: 20px; font-weight: bold; margin: 5px 0;">${money.format(balBonus)}</div>
-                                <div style="font-size: 11px; color: #ef4444;">Gastado: -${money.format(spentBonus)}</div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <h3 style="font-size: 14px; text-transform: uppercase; color: #9ca3af; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Detalle de Movimientos</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        ${rows || '<tr><td colspan="4" style="text-align:center; padding: 20px; color: #999;">Sin movimientos</td></tr>'}
-                    </table>
+                    <table style="width:100%;border-spacing:10px 0;margin-bottom:30px"><tr>
+                        <td style="background:#f9fafb;padding:15px;border-radius:8px;border:1px solid #e5e7eb;width:50%"><div style="font-size:11px;font-weight:bold;color:#4F46E5">CUENTA PRINCIPAL</div><div style="font-size:20px;font-weight:bold;margin:5px 0">${money.format(balS)}</div></td>
+                        <td style="background:#f9fafb;padding:15px;border-radius:8px;border:1px solid #e5e7eb;width:50%"><div style="font-size:11px;font-weight:bold;color:#0EA5E9">CUENTA BONO</div><div style="font-size:20px;font-weight:bold;margin:5px 0">${money.format(balB)}</div></td>
+                    </tr></table>
+                    <h3 style="font-size:14px;text-transform:uppercase;color:#9ca3af;border-bottom:1px solid #eee;padding-bottom:5px">Movimientos</h3>
+                    <table style="width:100%;border-collapse:collapse">${rows||'<tr><td colspan="4" style="text-align:center;padding:20px;color:#999">Sin movimientos</td></tr>'}</table>
                 </div>
             `;
-
-            const element = document.createElement('div');
-            element.innerHTML = content;
-            element.style.width = '700px'; 
-            
-            const opt = {
-                margin: 10,
-                filename: `Reporte_${currentYearMonth}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().from(element).set(opt).save().then(() => {
-                // MOSTRAR MODAL DE ÉXITO
-                const modal = document.getElementById('successModal');
-                modal.classList.remove('hidden');
-                
-                // Cierre automático opcional (3 segundos)
-                setTimeout(() => {
-                    if(!modal.classList.contains('hidden')) {
-                        closeSuccessModal();
-                    }
-                }, 3000);
+            const el = document.createElement('div'); el.innerHTML = content; el.style.width = '700px';
+            html2pdf().from(el).set({ margin: 10, filename: `Reporte_${currentYearMonth}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).save().then(() => {
+                const m = document.getElementById('successModal'); m.classList.remove('hidden'); setTimeout(() => { if(!m.classList.contains('hidden')) closeSuccessModal(); }, 3000);
             });
         }
