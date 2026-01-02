@@ -1,6 +1,6 @@
 # 💸 Sobreviviendo al Mes
 
-<img src="dashboardSobreviviendoAlMes.png" alt="Dashboard img">
+<img src="/assets/dashboardSobreviviendoAlMes.png" alt="Dashboard img">
 
 Un dashboard financiero personal, simple y directo para llevar el control de tus ingresos y gastos mensuales sin complicaciones. Olvídate de excels aburridos; esto es visual, rápido y funciona en tu navegador.
 
