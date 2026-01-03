@@ -218,6 +218,7 @@
             updateDashboard();
         }
 
+        // --- FUNCIONES MODALES BORRADO ---
         function openDeleteModal(id) { itemToDeleteId = id; document.getElementById('deleteModal').classList.remove('hidden'); }
         function closeDeleteModal() { itemToDeleteId = null; document.getElementById('deleteModal').classList.add('hidden'); }
         function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
@@ -229,6 +230,7 @@
             }
         }
 
+        // --- FUNCIONES EDICIÓN ---
         function openEditModal(id) {
             const item = currentData.items.find(i => i.id === id);
             if (!item) return;

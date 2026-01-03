@@ -199,17 +199,24 @@
 
             <!-- Tabla -->
             <div class="w-full lg:w-2/3 flex flex-col bg-white dark:bg-darkcard transition-colors">
-                <div class="p-4 bg-white dark:bg-darkcard border-b border-gray-100 dark:border-slate-700 flex justify-between items-center sticky top-0 z-10 gap-2 transition-colors">
-                    <div class="flex-1"><h3 class="font-bold text-gray-700 dark:text-gray-200 text-sm sm:text-base" id="historyTitle">Movimientos del Mes</h3></div>
-                    <div>
-                        <select id="categoryFilter" onchange="renderExpenses()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 text-xs rounded-lg p-2 outline-none focus:border-primary cursor-pointer">
-                            <option value="all">Todos</option> <option value="🛒">Super</option> <option value="🏠">Casa</option> <option value="🚗">Transp.</option> <option value="💊">Salud</option> <option value="🍔">Comida</option> <option value="💳">Tarjeta</option> <option value="💡">Servic.</option>
-                        </select>
+                <!-- CABECERA DE TABLA RESPONSIVA (STACKING PARA MOBILE) -->
+                <div class="p-4 bg-white dark:bg-darkcard border-b border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center sticky top-0 z-10 gap-3 transition-colors">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-700 dark:text-gray-200 text-sm sm:text-base" id="historyTitle">Movimientos del Mes</h3>
                     </div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 text-right bg-gray-50 dark:bg-slate-700/50 px-3 py-1 rounded-md border border-gray-100 dark:border-slate-700 hidden sm:block">
-                        Total: <span class="font-bold text-gray-800 dark:text-gray-200" id="totalSpentGlobal">$0.00</span>
+                    
+                    <div class="w-full sm:w-auto flex justify-between sm:justify-end items-center gap-3">
+                        <div>
+                            <select id="categoryFilter" onchange="renderExpenses()" class="bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 text-xs rounded-lg p-2 outline-none focus:border-primary cursor-pointer">
+                                <option value="all">Todos</option> <option value="🛒">Super</option> <option value="🏠">Casa</option> <option value="🚗">Transp.</option> <option value="💊">Salud</option> <option value="🍔">Comida</option> <option value="💳">Tarjeta</option> <option value="💡">Servic.</option>
+                            </select>
+                        </div>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 text-right bg-gray-50 dark:bg-slate-700/50 px-3 py-1 rounded-md border border-gray-100 dark:border-slate-700 whitespace-nowrap">
+                            Total: <span class="font-bold text-gray-800 dark:text-gray-200" id="totalSpentGlobal">$0.00</span>
+                        </div>
                     </div>
                 </div>
+
                 <div class="overflow-y-auto flex-grow custom-scrollbar">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-gray-50 dark:bg-slate-800 text-gray-500 dark:text-gray-400 text-xs uppercase sticky top-0">

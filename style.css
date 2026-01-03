@@ -1,4 +1,4 @@
-/* --- PALETA DE COLORES --- */
+ /* --- PALETA DE COLORES --- */
         :root {
             --color-primary: #4F46E5;   
             --color-secondary: #0EA5E9; 
@@ -42,7 +42,7 @@
         .mp-gradient { background: linear-gradient(135deg, var(--color-secondary) 0%, #005f8f 100%); }
         .savings-gradient { background: linear-gradient(135deg, var(--color-tertiary) 0%, #064e3b 100%); }
 
-        /* Radio Buttons Main Form */
+        /* Radio Buttons */
         input:checked + div.radio-box-primary {
             border-color: var(--color-primary); background-color: rgba(79, 70, 229, 0.1); color: var(--color-primary);
         }
