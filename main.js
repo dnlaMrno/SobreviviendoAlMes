@@ -117,6 +117,8 @@
 
         function calculateAccumulated() {
             let total = 0;
+            const base = parseFloat(localStorage.getItem('finance_savings_base')) || 0;
+            total += base;
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key.startsWith('finance_')) {
@@ -131,11 +133,22 @@
             return total;
         }
 
+        function openSavingsEditModal() {
+            const currentBase = parseFloat(localStorage.getItem('finance_savings_base')) || 0;
+            document.getElementById('savingsBaseInput').value = currentBase;
+            document.getElementById('savingsEditModal').classList.remove('hidden');
+        }
+        function closeSavingsEditModal() { document.getElementById('savingsEditModal').classList.add('hidden'); }
+        function saveSavingsBase() {
+            const val = parseCurrency(document.getElementById('savingsBaseInput').value);
+            localStorage.setItem('finance_savings_base', val);
+            updateDashboard();
+            closeSavingsEditModal();
+        }
+
         function getAntTotal() {
             const majorIcons = ['🏠', '🛒', '🚗', '💳'];
-            return currentData.items
-                .filter(item => !majorIcons.includes(item.icon))
-                .reduce((acc, item) => acc + item.amount, 0);
+            return currentData.items.filter(item => !majorIcons.includes(item.icon)).reduce((acc, item) => acc + item.amount, 0);
         }
 
         function checkAntExpenses() {
@@ -143,7 +156,6 @@
             const alertBox = document.getElementById('antExpenseAlert');
             const totalSpan = document.getElementById('antTotalDisplay');
             const limit = 100000;
-
             if (antTotal > limit) {
                 totalSpan.innerText = money.format(antTotal);
                 alertBox.classList.remove('hidden');
@@ -203,9 +215,7 @@
             currentData.items.unshift({ id: Date.now(), name, amount, icon, source, date: new Date().toLocaleDateString() });
             
             const newTotal = getAntTotal();
-            if (newTotal > 100000) {
-                document.getElementById('antLimitModal').classList.remove('hidden');
-            }
+            if (newTotal > 100000) { document.getElementById('antLimitModal').classList.remove('hidden'); }
 
             document.getElementById('expenseName').value = '';
             document.getElementById('expenseAmount').value = ''; 
@@ -218,7 +228,6 @@
             updateDashboard();
         }
 
-        // --- FUNCIONES MODALES BORRADO ---
         function openDeleteModal(id) { itemToDeleteId = id; document.getElementById('deleteModal').classList.remove('hidden'); }
         function closeDeleteModal() { itemToDeleteId = null; document.getElementById('deleteModal').classList.add('hidden'); }
         function closeSuccessModal() { document.getElementById('successModal').classList.add('hidden'); }
@@ -230,7 +239,6 @@
             }
         }
 
-        // --- FUNCIONES EDICIÓN ---
         function openEditModal(id) {
             const item = currentData.items.find(i => i.id === id);
             if (!item) return;
@@ -240,17 +248,11 @@
             document.getElementById('editIcon').value = item.icon;
             
             const radios = document.getElementsByName('editSource');
-            for(const r of radios) {
-                if(r.value === item.source) r.checked = true;
-            }
+            for(const r of radios) { if(r.value === item.source) r.checked = true; }
 
             document.getElementById('editModal').classList.remove('hidden');
         }
-
-        function closeEditModal() {
-            itemToEditId = null;
-            document.getElementById('editModal').classList.add('hidden');
-        }
+        function closeEditModal() { itemToEditId = null; document.getElementById('editModal').classList.add('hidden'); }
 
         function saveEdit() {
             const newName = document.getElementById('editName').value.trim();
@@ -260,10 +262,7 @@
             const radios = document.getElementsByName('editSource');
             for(const r of radios) if(r.checked) newSource = r.value;
 
-            if (!newName || isNaN(newAmount) || newAmount <= 0) {
-                alert("Por favor revisa los datos");
-                return;
-            }
+            if (!newName || isNaN(newAmount) || newAmount <= 0) { alert("Datos incorrectos"); return; }
 
             const itemIndex = currentData.items.findIndex(i => i.id === itemToEditId);
             if (itemIndex > -1) {
@@ -271,7 +270,6 @@
                 currentData.items[itemIndex].amount = newAmount;
                 currentData.items[itemIndex].icon = newIcon;
                 currentData.items[itemIndex].source = newSource;
-                
                 updateDashboard();
                 renderExpenses();
                 closeEditModal();
@@ -285,17 +283,12 @@
             const emptyState = document.getElementById('emptyState');
 
             let itemsToShow = currentData.items;
-            if (filterVal !== 'all') {
-                itemsToShow = currentData.items.filter(item => item.icon === filterVal);
-            }
+            if (filterVal !== 'all') { itemsToShow = currentData.items.filter(item => item.icon === filterVal); }
 
             if (itemsToShow.length === 0) {
                 emptyState.classList.remove('hidden');
-                if (currentData.items.length > 0) {
-                    emptyState.querySelector('p').innerText = "No hay gastos de este tipo";
-                } else {
-                    emptyState.querySelector('p').innerText = "Sin movimientos este mes";
-                }
+                if (currentData.items.length > 0) { emptyState.querySelector('p').innerText = "No hay gastos de este tipo"; } 
+                else { emptyState.querySelector('p').innerText = "Sin movimientos este mes"; }
                 return;
             }
             emptyState.classList.add('hidden');
@@ -363,8 +356,15 @@
                     <table style="width:100%;border-collapse:collapse">${rows||'<tr><td colspan="4" style="text-align:center;padding:20px;color:#999">Sin movimientos</td></tr>'}</table>
                 </div>
             `;
-            const el = document.createElement('div'); el.innerHTML = content; el.style.width = '700px';
-            html2pdf().from(el).set({ margin: 10, filename: `Reporte_${currentYearMonth}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).save().then(() => {
+            const element = document.createElement('div');
+            element.innerHTML = content;
+            element.style.width = '700px';
+            element.style.position = 'absolute';
+            element.style.left = '-9999px';
+            document.body.appendChild(element);
+
+            html2pdf().from(element).set({ margin: 10, filename: `Reporte_${currentYearMonth}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).save().then(() => {
+                document.body.removeChild(element);
                 const m = document.getElementById('successModal'); m.classList.remove('hidden'); setTimeout(() => { if(!m.classList.contains('hidden')) closeSuccessModal(); }, 3000);
             });
         }
